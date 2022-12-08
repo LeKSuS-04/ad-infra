@@ -102,10 +102,4 @@ variable "local_dirs" {
     result_dir = string
     src_dir    = string
   })
-
-  default = {
-    result_dir = "./result"
-    temp_dir   = "./.tmp"
-    src_dir    = "./ad-training-03-11-2022"
-  }
 }
