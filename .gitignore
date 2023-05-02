@@ -3,3 +3,7 @@
 
 # Hide all sketches
 diagrams
+
+# Hide resources
+!resources/README.md
+resources/*
