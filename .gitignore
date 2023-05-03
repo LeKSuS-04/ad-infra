@@ -7,3 +7,8 @@ diagrams
 # Hide resources
 !resources/README.md
 resources/*
+
+# Python stuff
+__pycache__/
+*.py[cod]
+.venv
