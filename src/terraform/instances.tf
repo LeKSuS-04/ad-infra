@@ -14,17 +14,17 @@ resource "yandex_compute_instance" "vpn_server" {
   boot_disk {
     initialize_params {
       image_id = local.ubuntu_image_id
-      size = var.vpn_vm.ssd_gb
-      type = "network-ssd"
+      size     = var.vpn_vm.ssd_gb
+      type     = "network-ssd"
     }
   }
 
   network_interface {
     subnet_id = yandex_vpc_subnet.vulnbox_subnet.id
+    nat       = true
   }
 
   metadata = {
-    serial-port-enable = 1
-    user-data          = "#!/usr/bin/env bash\n\necho 'root:toor' | chpasswd"
+    user-data = file("./cloud-init.yaml")
   }
 }
