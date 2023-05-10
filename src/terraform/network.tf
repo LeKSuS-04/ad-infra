@@ -6,7 +6,7 @@ resource "yandex_vpc_network" "ad_network" {
 resource "yandex_vpc_subnet" "admin_subnet" {
   name           = "admin-subnet"
   description    = "subnet for game administrating services"
-  zone           = var.yandex_cloud_zone
+  zone           = var.yandex_cloud.zone
   network_id     = yandex_vpc_network.ad_network.id
   v4_cidr_blocks = ["192.168.1.0/24"]
 }
@@ -31,7 +31,7 @@ resource "yandex_vpc_route_table" "vulnbox_route_table" {
 resource "yandex_vpc_subnet" "vulnbox_subnet" {
   name           = "vulnbox-subnet"
   description    = "subnet for participants' vulnboxes"
-  zone           = var.yandex_cloud_zone
+  zone           = var.yandex_cloud.zone
   network_id     = yandex_vpc_network.ad_network.id
   route_table_id = yandex_vpc_route_table.vulnbox_route_table.id
   v4_cidr_blocks = ["192.168.2.0/24"]

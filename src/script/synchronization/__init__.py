@@ -1,0 +1,67 @@
+import threading
+from typing import Any, Callable
+from functools import wraps
+
+from .resources import Resource
+from .storage import Storage
+from utils.logger import log
+from utils.singleton import Singleton
+
+
+class Synchronizator(metaclass=Singleton):
+    def __init__(self):
+        self._events = {
+            key: threading.Event() for key in Resource
+        }
+        self._storage = Storage()
+        self.aborted = False
+
+    def abort(self):
+        self.aborted = True
+        for key in self._events.keys():
+            self._events[key].set()
+
+    def wait_for(self, key: Resource):
+        self._events[key].wait()
+
+    def set_resource(self, key: Resource, value: Any) -> Any:
+        if self._events[key].is_set():
+            raise ValueError(f'resource {key} is being set second time')
+
+        self._storage[key] = value
+        self._events[key].set()
+        return self._storage[key]
+
+    def get_resource(self, key: Resource) -> Any:
+        self.wait_for(key)
+        return self._storage[key]
+
+    @classmethod
+    def get_instance(cls):
+        return Synchronizator()
+
+    @staticmethod
+    def task(depends_on: list[Resource]):
+        def decorator(func: Callable):
+            @wraps(func)
+            def wrapper():
+                task_name = func.__name__
+                sync = Synchronizator.get_instance()
+                for key in depends_on:
+                    sync.wait_for(key)
+                
+                if sync.aborted:
+                    log(f'task {task_name} was skipped')
+                    return None
+
+                try:
+                    log(f'starting task {task_name}')
+                    result = func(sync)
+                    log(f'finished task {task_name}')
+                    return result
+                except BaseException as e:
+                    log(f'error in task {task_name}: {e}')
+                    sync.abort()
+                    return None
+            return wrapper
+        return decorator

@@ -7,13 +7,15 @@ resource "yandex_compute_instance" "vpn_server" {
   description = "manages game VPN network"
 
   resources {
-    cores  = 2
-    memory = 2
+    cores  = var.vpn_vm.cores
+    memory = var.vpn_vm.ram_gb
   }
 
   boot_disk {
     initialize_params {
       image_id = local.ubuntu_image_id
+      size = var.vpn_vm.ssd_gb
+      type = "network-ssd"
     }
   }
 

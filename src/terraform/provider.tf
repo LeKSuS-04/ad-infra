@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "yandex" {
-  folder_id = var.yandex_cloud_folder_id
-  zone      = var.yandex_cloud_zone
-  token     = var.yandex_cloud_iam_token
+  folder_id = var.yandex_cloud.folder_id
+  zone      = var.yandex_cloud.zone
+  token     = var.yandex_cloud.iam_token
 }

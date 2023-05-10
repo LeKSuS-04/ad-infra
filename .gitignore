@@ -1,5 +1,9 @@
 # Hide all configuration files for the time being
-/*.yaml
+config.yaml
+teams.yaml
+
+# Hide all outputs
+generated/*
 
 # Hide all sketches
 diagrams
@@ -12,3 +16,6 @@ resources/*
 __pycache__/
 *.py[cod]
 .venv
+
+# VSCode
+.vscode
