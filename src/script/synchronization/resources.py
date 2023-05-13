@@ -7,4 +7,5 @@ class Resource(Enum):
     VPN_ADDRESS = auto()
     JURY_ADDRESS = auto()
     BASTION_ADDRESS = auto()
+    VULNBOX_INTERNAL_ADDRESSES = auto()
     INFRASTRUCTURE_READY = auto()

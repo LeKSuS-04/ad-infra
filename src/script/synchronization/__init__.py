@@ -40,28 +40,29 @@ class Synchronizator(metaclass=Singleton):
     def get_instance(cls):
         return Synchronizator()
 
-    @staticmethod
-    def task(depends_on: list[Resource]):
-        def decorator(func: Callable):
-            @wraps(func)
-            def wrapper():
-                task_name = func.__name__
-                sync = Synchronizator.get_instance()
-                for key in depends_on:
-                    sync.wait_for(key)
-                
-                if sync.aborted:
-                    log(f'task {task_name} was skipped')
-                    return None
 
-                try:
-                    log(f'starting task {task_name}')
-                    result = func(sync)
-                    log(f'finished task {task_name}')
-                    return result
-                except BaseException as e:
-                    log(f'error in task {task_name}: {e}')
-                    sync.abort()
-                    return None
-            return wrapper
-        return decorator
+def task(depends_on: list[Resource]):
+    def decorator(func: Callable):
+        @wraps(func)
+        def wrapper():
+            task_name = func.__name__
+            sync = Synchronizator.get_instance()
+            resources = []
+            for key in depends_on:
+                resources.append(sync.get_resource(key))
+
+            if sync.aborted:
+                log(f'task {task_name} was skipped')
+                return None
+
+            try:
+                log(f'starting task {task_name}')
+                result = func(sync, *resources)
+                log(f'finished task {task_name}')
+                return result
+            except BaseException as e:
+                log(f'error in task {task_name}: {e}')
+                sync.abort()
+                return None
+        return wrapper
+    return decorator

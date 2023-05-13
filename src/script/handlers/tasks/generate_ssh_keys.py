@@ -3,13 +3,14 @@ from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from synchronization import Synchronizator, Resource
+from synchronization import Synchronizator, task
+from synchronization.resources import Resource
 
 
-@Synchronizator.task(depends_on=[])
+@task(depends_on=[])
 def generate_ssh_keys(sync: Synchronizator):
     key = ec.generate_private_key(
-        ec.SECP256K1()
+        ec.SECP256R1()
     )
     sync.set_resource(Resource.ADMIN_SSH_KEY, key)
 

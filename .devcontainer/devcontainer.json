@@ -1,51 +1,52 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-	"name": "Existing Dockerfile",
-	"build": {
-		// Sets the run context to one level up instead of the .devcontainer folder.
-		"context": "..",
-		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
-		"dockerfile": "../Dockerfile"
-	},
-	"features": {
-		"ghcr.io/devcontainers-contrib/features/black": {
-			"version": "latest"
-		}
-	},
-	
-	"updateRemoteUserUID": true,
-	
-	"workspaceMount": "source=${localWorkspaceFolder}/src,target=/app,type=bind,consistency=cached",
-	"workspaceFolder": "/app",
+  "name": "Existing Dockerfile",
+  "build": {
+    // Sets the run context to one level up instead of the .devcontainer folder.
+    "context": "..",
+    // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+    "dockerfile": "../Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/black": {
+      "version": "latest"
+    },
+    "ghcr.io/stuartleeks/dev-container-features/shell-history": {}
+  },
 
-	"mounts": [
-		{
-			"source": "${localWorkspaceFolder}/config.yaml",
-			"target": "${containerWorkspaceFolder}/config.yaml",
-			"type": "bind"
-		},
-		{
-			"source": "${localWorkspaceFolder}/teams.yaml",
-			"target": "${containerWorkspaceFolder}/teams.yaml",
-			"type": "bind"
-		},
-		{
-			"source": "${localWorkspaceFolder}/generated/",
-			"target": "${containerWorkspaceFolder}/generated/",
-			"type": "bind"
-		}
-	]
+  "updateRemoteUserUID": true,
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+  "workspaceMount": "source=${localWorkspaceFolder}/src,target=/app,type=bind,consistency=cached",
+  "workspaceFolder": "/app",
 
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "cat /etc/os-release",
+  "mounts": [
+    {
+      "source": "${localWorkspaceFolder}/config.yaml",
+      "target": "${containerWorkspaceFolder}/config.yaml",
+      "type": "bind"
+    },
+    {
+      "source": "${localWorkspaceFolder}/teams.yaml",
+      "target": "${containerWorkspaceFolder}/teams.yaml",
+      "type": "bind"
+    },
+    {
+      "source": "${localWorkspaceFolder}/generated/",
+      "target": "${containerWorkspaceFolder}/generated/",
+      "type": "bind"
+    }
+  ]
 
-	// Configure tool-specific properties.
-	// "customizations": {},
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
 
-	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "devcontainer"
+  // Uncomment the next line to run commands after the container is created.
+  // "postCreateCommand": "cat /etc/os-release",
+
+  // Configure tool-specific properties.
+  // "customizations": {},
+
+  // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "devcontainer"
 }

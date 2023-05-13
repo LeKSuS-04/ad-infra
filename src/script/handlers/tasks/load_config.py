@@ -10,7 +10,7 @@ from models import (
     TerraformConfig,
     VMConfig,
 )
-from synchronization import Synchronizator
+from synchronization import Synchronizator, task
 from synchronization.resources import Resource
 from utils.logger import log
 
@@ -19,7 +19,7 @@ def create_team(loaded: LoadedTeamsItem) -> Team:
     return Team(name=loaded.name)
 
 
-@Synchronizator.task(depends_on=[])
+@task(depends_on=[])
 def load_config(sync: Synchronizator):
     config_path = Path.cwd() / 'config.yaml'
     teams_path = Path.cwd() / 'teams.yaml'
