@@ -1,11 +1,17 @@
-from handlers.tasks import generate_ssh_keys, load_config, deploy_infrastructure
-from synchronization.task_manager import TaskManager
+from handlers.tasks import (
+    pack_sources,
+    generate_ssh_keys,
+    load_config,
+    deploy_infrastructure, 
+)
+from utils.sync.task_manager import TaskManager
 
 
 def deploy():
     task_manager = TaskManager()
     task_manager.add_tasks(
         [
+            pack_sources,
             generate_ssh_keys,
             load_config,
             deploy_infrastructure,

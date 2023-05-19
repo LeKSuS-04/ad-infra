@@ -10,8 +10,8 @@ from models import (
     TerraformConfig,
     VMConfig,
 )
-from synchronization import Synchronizator, task
-from synchronization.resources import Resource
+from utils.sync import Synchronizator, task
+from utils.sync.resources import Resource
 from utils.logger import log
 
 
@@ -26,10 +26,10 @@ def load_config(sync: Synchronizator):
 
     with open(config_path, 'r') as config_file, open(teams_path, 'r') as teams_file:
         loaded_config = LoadedConfig.parse_obj(yaml.load(config_file, yaml.SafeLoader))
-        log('loaded and validated config.yaml')
+        log('Loaded and validated config.yaml')
 
         loaded_teams = LoadedTeams.parse_obj(yaml.load(teams_file, yaml.SafeLoader))
-        log('loaded and validated teams.yaml')
+        log('Loaded and validated teams.yaml')
 
     if loaded_config.teams.add_npc:
         loaded_teams.teams.append(LoadedTeamsItem(name='NPC'))

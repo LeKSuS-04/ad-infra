@@ -24,9 +24,9 @@ class Synchronizator(metaclass=Singleton):
     def wait_for(self, key: Resource):
         self._events[key].wait()
 
-    def set_resource(self, key: Resource, value: Any) -> Any:
+    def set_resource(self, key: Resource, value: Any = True) -> Any:
         if self._events[key].is_set():
-            raise ValueError(f'resource {key} is being set second time')
+            raise ValueError(f'Resource {key} is being set second time')
 
         self._storage[key] = value
         self._events[key].set()
@@ -52,16 +52,16 @@ def task(depends_on: list[Resource]):
                 resources.append(sync.get_resource(key))
 
             if sync.aborted:
-                log(f'task {task_name} was skipped')
+                log(f'Task {task_name} was skipped')
                 return None
 
             try:
-                log(f'starting task {task_name}')
+                log(f'Starting task {task_name}')
                 result = func(sync, *resources)
-                log(f'finished task {task_name}')
+                log(f'Finished task {task_name}')
                 return result
             except BaseException as e:
-                log(f'error in task {task_name}: {e}')
+                log(f'Error in task {task_name}: {e}')
                 sync.abort()
                 return None
         return wrapper
