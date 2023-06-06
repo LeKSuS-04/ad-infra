@@ -2,7 +2,7 @@ import random
 import threading
 
 from colorama import Fore, Style
-from string import ascii_uppercase
+from string import ascii_uppercase, digits
 
 
 COLORS = [
@@ -16,7 +16,7 @@ COLORS = [
 ]
 
 
-print_lock = threading.Lock()
+PRINT_LOCK = threading.Lock()
 
 
 def hash_to_five_digits(n: int) -> int:
@@ -26,12 +26,12 @@ def hash_to_five_digits(n: int) -> int:
 
 
 def log(data, **print_kwargs):
-    with print_lock:
-        tid = hash_to_five_digits(threading.get_ident())
-        rng = random.Random(tid)
-        colors = rng.choice(COLORS)
-        letters = ''.join(rng.choice(ascii_uppercase) for _ in range(3))
-        tag = f'{Style.RESET_ALL}{colors}[{letters}{tid:05}]{Style.RESET_ALL}'
+    tid = hash_to_five_digits(threading.get_ident())
+    rng = random.Random(tid)
+    colors = ''.join(rng.choice(COLORS) for _ in range(3))
+    log_id = ''.join(rng.choice(ascii_uppercase + digits) for _ in range(5))
+    tag = f'{Style.RESET_ALL}{colors}[{log_id}]{Style.RESET_ALL}'
 
+    with PRINT_LOCK:
         for line in str(data).strip('\n').split('\n'):
             print(f'{tag} {line}', flush=True, **print_kwargs)

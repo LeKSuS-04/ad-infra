@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -13,8 +12,9 @@ def generate_ssh_keys(sync: Synchronizator):
     key = ec.generate_private_key(ec.SECP256R1())
     sync.set_resource(Resource.ADMIN_SSH_KEY, key)
 
-    priv_key_path = GENERATED_PATH / 'id_ecdsa'
-    pub_key_path = GENERATED_PATH / 'id_ecdsa.pub'
+    ssh_key_file = 'id_ecdsa'
+    priv_key_path = GENERATED_PATH / ssh_key_file
+    pub_key_path = GENERATED_PATH / f'{ssh_key_file}.pub'
     with open(priv_key_path, 'wb') as priv, open(pub_key_path, 'wb') as pub:
         priv.write(
             key.private_bytes(
@@ -30,3 +30,4 @@ def generate_ssh_keys(sync: Synchronizator):
         )
 
     os.chmod(priv_key_path, 0o600)
+    sync.set_resource(Resource.ADMIN_SSH_KEY_FILE, ssh_key_file)

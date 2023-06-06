@@ -10,9 +10,7 @@ from utils.singleton import Singleton
 
 class Synchronizator(metaclass=Singleton):
     def __init__(self):
-        self._events = {
-            key: threading.Event() for key in Resource
-        }
+        self._events = {key: threading.Event() for key in Resource}
         self._storage = Storage()
         self.aborted = False
 
@@ -25,6 +23,9 @@ class Synchronizator(metaclass=Singleton):
         self._events[key].wait()
 
     def set_resource(self, key: Resource, value: Any = True) -> Any:
+        if self.aborted:
+            return
+
         if self._events[key].is_set():
             raise ValueError(f'Resource {key} is being set second time')
 
@@ -64,5 +65,7 @@ def task(depends_on: list[Resource]):
                 log(f'Error in task {task_name}: {e}')
                 sync.abort()
                 return None
+
         return wrapper
+
     return decorator

@@ -17,7 +17,7 @@ resource "yandex_vpc_subnet" "vulnbox_subnet" {
   zone           = var.yandex_cloud.zone
   network_id     = yandex_vpc_network.ad_network.id
   route_table_id = yandex_vpc_route_table.vulnbox_route_table.id
-  v4_cidr_blocks = ["192.168.2.0/24"]
+  v4_cidr_blocks = ["172.16.0.0/16"]
 }
 
 resource "yandex_vpc_route_table" "vulnbox_route_table" {

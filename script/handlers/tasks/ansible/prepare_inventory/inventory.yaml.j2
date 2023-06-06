@@ -1,0 +1,24 @@
+all:
+  children:
+    virtualmachines:
+      vars:
+        ansible_user: {{admin_username}}
+        ansible_ssh_private_key_file: {{admin_ssh_key_file_path}}
+
+      children:
+        vulnboxes:
+          vars:
+            ansible_ssh_common_args: -o ProxyCommand="ssh -i {{admin_ssh_key_file_path}} -q -W %h:%p {{admin_username}}@{{bastion_host}}"
+  
+          hosts:
+            {%- for host in vulnbox_hosts %}
+            {{host}}:
+            {%- endfor %}
+          
+        vpn:
+          hosts:
+            {{vpn_host}}:
+
+        jury:
+          hosts:
+            {{jury_host}}:

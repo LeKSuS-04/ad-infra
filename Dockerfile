@@ -1,9 +1,11 @@
 FROM python:3.10.11-bullseye
 
 WORKDIR /app
-COPY src/ .
+COPY --chown=1000:1000 --chmod=755 script/ ./script/
+COPY --chown=1000:1000 --chmod=777 ansible/ ./ansible/
+COPY --chown=1000:1000 --chmod=777 terraform/ ./terraform/
 
-RUN apt update -y && apt install unzip 
+RUN apt update -y && apt install unzip=6.0-26+deb11u1 openvpn=2.5.1-3 -y
 
 # Install Terraform 1.4.6
 RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/terraform/1.4.6/terraform_1.4.6_linux_amd64.zip
@@ -11,20 +13,15 @@ RUN unzip -d /tmp -o /tmp/terraform_1.4.6_linux_amd64.zip
 RUN mv /tmp/terraform /bin/terraform
 
 # Initialize terraform
-VOLUME [ "/app/terraform" ]
 ENV TF_CLI_CONFIG_FILE=/app/terraform/mirror.tfrc
 RUN terraform -chdir=./terraform init
 
 # Set up python
 ENV PYTHONUNBUFFERED=1
-RUN python -m pip install --no-cache --upgrade pip setuptools
-
-# Install Ansible 7.5.0
-RUN python -m pip install --no-cache --upgrade ansible==7.5.0
-
-# Set up OVPNGen
-RUN git clone https://github.com/LeKSuS-04/OVPNGen.git
-RUN python -m pip install --no-cache --upgrade -r OVPNGen/requirements.txt
 
 # Install control script requirements
-RUN pip install --no-cache --upgrade -r script/requirements.txt
+COPY ./requirements.txt .
+RUN pip install --no-cache --upgrade -r requirements.txt
+
+WORKDIR /app
+ENTRYPOINT [ "./script/main.py" ]
