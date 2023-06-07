@@ -1,19 +1,7 @@
 import re
-from pathlib import Path
-from typing import cast, Callable, Any
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
-from cryptography.hazmat.primitives import serialization
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from typing import Callable, Any
 
-from constants.paths import TERRAFORM_PATH
-from tools import Syncer, Resource, log
-
-
-TEMPLATE_PATH = Path(__file__).parent
-JINJA_ENV = Environment(
-    loader=FileSystemLoader(TEMPLATE_PATH),
-    autoescape=cast(bool, select_autoescape()),
-)
+from tools import Syncer, Resource
 
 
 class _TerraformOutputParser:
@@ -40,22 +28,6 @@ class _TerraformOutputParser:
     def process(self, sync: Syncer, terraform_output: str):
         value = self.get_terraform_output_variable(terraform_output)
         sync.set_resource(self.resource, self.processer(value))
-
-
-def save_cloud_init_config(ssh_key: EllipticCurvePrivateKey):
-    cloud_init_config_path = TERRAFORM_PATH / "cloud-init.yaml"
-    with open(cloud_init_config_path, "w") as f:
-        cloud_init_template = JINJA_ENV.get_template("cloud-init.yaml.j2")
-        public_key = (
-            ssh_key.public_key()
-            .public_bytes(
-                serialization.Encoding.OpenSSH, serialization.PublicFormat.OpenSSH
-            )
-            .decode()
-        )
-        rendered = cloud_init_template.render(public_key=public_key)
-        f.write(cast(str, rendered))
-        log(f"Saved cloud-init config into {cloud_init_config_path}")
 
 
 def save_resources(sync: Syncer, terraform_output: str):

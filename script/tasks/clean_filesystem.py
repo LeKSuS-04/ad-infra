@@ -13,7 +13,8 @@ def clean_directory(dir_path: Path):
                 if entity.is_dir():
                     shutil.rmtree(entity)
                 else:
-                    os.remove(entity)
+                    if entity.name != ".keep":
+                        os.remove(entity)
         log(f'Cleaned "{dir_path.name}"')
     except FileNotFoundError:
         log(f"Didn't clean \"{dir_path.name}\" because it doesn't exist")

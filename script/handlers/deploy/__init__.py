@@ -1,6 +1,6 @@
 from tasks import (
     pack_sources,
-    generate_ssh_keys,
+    get_ssh_keys,
     load_config,
     vpn,
     terraform,
@@ -14,7 +14,7 @@ def deploy():
     task_manager.add_tasks(
         [
             pack_sources,
-            generate_ssh_keys,
+            get_ssh_keys,
             load_config,
             vpn.create_configs,
             terraform.deploy_infrastructure,

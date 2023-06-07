@@ -1,5 +1,6 @@
 from tasks import (
     load_config,
+    get_ssh_keys,
     clean_filesystem,
     terraform,
 )
@@ -11,6 +12,7 @@ def destroy():
     task_manager.add_tasks(
         [
             load_config,
+            get_ssh_keys,
             terraform.destroy_infrastructure,
             clean_filesystem,
         ]
