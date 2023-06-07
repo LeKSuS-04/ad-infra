@@ -5,11 +5,7 @@ teams.yaml
 # Hide all outputs
 generated/*
 
-# Hide all sketches
-diagrams
-
 # Hide resources
-!resources/README.md
 resources/*
 
 # Python stuff
