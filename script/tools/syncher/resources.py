@@ -13,3 +13,6 @@ class Resource(Enum):
     VULNBOX_HOSTS = auto()
     INFRASTRUCTURE_READY = auto()
     ANSIBLE_INVENTORY_READY = auto()
+
+    TERRAFORM_DESTROYED = auto()
+    FILESYSTEM_CLEANED = auto()

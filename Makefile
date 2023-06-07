@@ -2,7 +2,7 @@ CWD=$(shell pwd)
 USER=$(shell id -u)
 GROUP=$(shell id -g)
 
-DOCKER_FLAGS = docker run \
+DOCKER_RUN=docker run \
 	--volume "$(CWD)/config.yaml:/app/config.yaml:ro" \
 	--volume "$(CWD)/teams.yaml:/app/teams.yaml:ro" \
 	--volume "$(CWD)/generated/:/app/generated/" \
@@ -12,15 +12,19 @@ DOCKER_FLAGS = docker run \
 	--interactive \
 	--tty \
 	--rm
-IMAGE = $(DOCKER_FLAGS) ad-infra
+AD_INFRA=$(DOCKER_RUN) ad-infra
 
 .PHONY: deploy
 deploy:
-	$(IMAGE) deploy
+	$(AD_INFRA) deploy
+
+.PHONY: destroy
+destroy:
+	$(AD_INFRA) destroy
 
 .PHONY: shell
 shell:
-	$(DOCKER_FLAGS) --entrypoint="/bin/bash" ad-infra
+	$(DOCKER_RUN) --entrypoint="/bin/bash" ad-infra
 
 .PHONY: docker-build
 docker-build:

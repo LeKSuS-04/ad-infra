@@ -1,12 +1,12 @@
-from handlers.tasks import (
+from tasks import (
     pack_sources,
     generate_ssh_keys,
     load_config,
-    ovpngen_create_configs,
+    vpn,
     terraform,
     ansible,
 )
-from utils.sync.task_manager import TaskManager
+from tools import TaskManager
 
 
 def deploy():
@@ -16,7 +16,7 @@ def deploy():
             pack_sources,
             generate_ssh_keys,
             load_config,
-            # ovpngen_create_configs,
+            vpn.create_configs,
             terraform.deploy_infrastructure,
             ansible.prepare_inventory,
         ]

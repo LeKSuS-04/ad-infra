@@ -13,7 +13,7 @@ def process(cmd: str, **options: Any) -> bytes:
         stderr=subprocess.STDOUT,
         **options
     )
-    stdout = b''
+    stdout = b""
 
     for line in cast(IO[bytes], proc.stdout):
         stdout += line

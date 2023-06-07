@@ -7,7 +7,7 @@ from pydantic import BaseModel, PositiveInt, validator, conint
 class YandexCloudConfig(BaseModel):
     folder_id: str
     iam_token: str
-    zone: Literal['ru-central1-a'] | Literal['ru-central1-b'] | Literal['ru-central1-c']
+    zone: Literal["ru-central1-a"] | Literal["ru-central1-b"] | Literal["ru-central1-c"]
 
 
 class LoadedConfigTeams(BaseModel):
@@ -16,7 +16,8 @@ class LoadedConfigTeams(BaseModel):
 
 
 class LoadedConfig(BaseModel):
-    ''' Structure of config.yaml '''
+    """Structure of config.yaml"""
+
     yandex_cloud: YandexCloudConfig
     src_path: Path
     teams: LoadedConfigTeams
@@ -27,10 +28,11 @@ class LoadedTeamsItem(BaseModel):
 
 
 class LoadedTeams(BaseModel):
-    ''' Structure of teams.yaml '''
+    """Structure of teams.yaml"""
+
     teams: list[LoadedTeamsItem]
 
-    @validator('teams')
+    @validator("teams")
     def must_be_unique(cls, teams: list[LoadedTeamsItem]):
         for team in teams:
             if list(map(lambda t: t.name == team.name, teams)).count(True) > 1:
@@ -58,10 +60,11 @@ class TerraformConfig(BaseModel):
 
 
 class Config(BaseModel):
-    '''
+    """
     Configuration, created by merging LoadedConfig, LoadedTeams and adding
     a bit of magic
-    '''
+    """
+
     terraform_config: TerraformConfig
     src_path: Path
     teams: list[Team]

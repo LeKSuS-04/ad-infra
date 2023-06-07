@@ -10,9 +10,7 @@ from models import (
     TerraformConfig,
     VMConfig,
 )
-from utils.sync import Synchronizator, task
-from utils.sync.resources import Resource
-from utils.logger import log
+from tools import task, Syncer, Resource, log
 
 
 def create_team(loaded: LoadedTeamsItem) -> Team:
@@ -20,19 +18,19 @@ def create_team(loaded: LoadedTeamsItem) -> Team:
 
 
 @task(depends_on=[])
-def load_config(sync: Synchronizator):
-    config_path = Path.cwd() / 'config.yaml'
-    teams_path = Path.cwd() / 'teams.yaml'
+def load_config(sync: Syncer):
+    config_path = Path.cwd() / "config.yaml"
+    teams_path = Path.cwd() / "teams.yaml"
 
-    with open(config_path, 'r') as config_file, open(teams_path, 'r') as teams_file:
+    with open(config_path, "r") as config_file, open(teams_path, "r") as teams_file:
         loaded_config = LoadedConfig.parse_obj(yaml.load(config_file, yaml.SafeLoader))
-        log('Loaded and validated config.yaml')
+        log("Loaded and validated config.yaml")
 
         loaded_teams = LoadedTeams.parse_obj(yaml.load(teams_file, yaml.SafeLoader))
-        log('Loaded and validated teams.yaml')
+        log("Loaded and validated teams.yaml")
 
     if loaded_config.teams.add_npc:
-        loaded_teams.teams.append(LoadedTeamsItem(name='NPC'))
+        loaded_teams.teams.append(LoadedTeamsItem(name="NPC"))
 
     terraform_config = TerraformConfig(
         yandex_cloud=loaded_config.yandex_cloud,

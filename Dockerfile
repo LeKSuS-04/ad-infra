@@ -4,6 +4,7 @@ WORKDIR /app
 COPY --chown=1000:1000 --chmod=755 script/ ./script/
 COPY --chown=1000:1000 --chmod=777 ansible/ ./ansible/
 COPY --chown=1000:1000 --chmod=777 terraform/ ./terraform/
+RUN mkdir -p /internal
 
 RUN apt update -y && apt install unzip=6.0-26+deb11u1 openvpn=2.5.1-3 -y
 
