@@ -1,0 +1,25 @@
+---
+- name: Install package
+  ansible.builtin.apt:
+    pkg: openvpn=2.5.5-1ubuntu3
+    state: present
+    update_cache: yes
+
+- name: Copy files
+  ansible.builtin.copy:
+    src: "/internal/vpn/{{item}}/server/"
+    dest: /ovpn_configs
+  loop:
+    - jury
+    - vuln
+    - team
+
+- name: Get list of config files
+  ansible.builtin.find:
+    path: /ovpn_configs
+    pattern: "*.conf"
+  register: openvpn_configs
+
+- name: Start OpenVPN daemon for each of config files
+  ansible.builtin.shell: "openvpn --config {{item.path}} --daemon"
+  loop: "{{ openvpn_configs.files }}"

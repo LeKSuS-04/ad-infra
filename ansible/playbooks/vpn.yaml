@@ -1,0 +1,10 @@
+---
+- name: Configure VPN host
+  hosts: vpn
+
+  tasks:
+    - name: Run OpenVPN server configs
+      ansible.builtin.import_role:
+        name: start_openvpn_server
+
+    # TODO: schedule network

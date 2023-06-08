@@ -1,5 +1,7 @@
 locals {
-  ubuntu_image_id = "fd82sqrj4uk9j7vlki3q"
+  # Ubuntu 22.04 LTS
+  # https://cloud.yandex.ru/marketplace/products/yc/ubuntu-22-04-lts#product-ids
+  ubuntu_image_id = "fd8ps4vdhf5hhuj8obp2"
 
   shared_metadata = {
     serial-port-enable = 0

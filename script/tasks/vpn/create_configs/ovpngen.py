@@ -15,13 +15,13 @@ def initialize():
     if initialized():
         raise OSError("OVPN output directories already initialized")
 
-    os.makedirs(config.TEAM_SERVER_DIR)
-    os.makedirs(config.VULN_SERVER_DIR)
-    os.makedirs(config.JURY_SERVER_DIR)
+    os.makedirs(config.TEAM_SERVER_DIR, exist_ok=True)
+    os.makedirs(config.VULN_SERVER_DIR, exist_ok=True)
+    os.makedirs(config.JURY_SERVER_DIR, exist_ok=True)
 
-    os.makedirs(config.TEAM_CLIENT_DIR)
-    os.makedirs(config.VULN_CLIENT_DIR)
-    os.makedirs(config.JURY_CLIENT_DIR)
+    os.makedirs(config.TEAM_CLIENT_DIR, exist_ok=True)
+    os.makedirs(config.VULN_CLIENT_DIR, exist_ok=True)
+    os.makedirs(config.JURY_CLIENT_DIR, exist_ok=True)
 
 
 def generate(team_count, per_team, vpn_server):
