@@ -11,6 +11,7 @@ class Resource(Enum):
     JURY_HOST = auto()
     BASTION_HOST = auto()
     VULNBOX_HOSTS = auto()
+    TERRAFORM_CONFIG_READY = auto()
     INFRASTRUCTURE_READY = auto()
     ANSIBLE_INVENTORY_READY = auto()
 

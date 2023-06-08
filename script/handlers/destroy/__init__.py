@@ -13,6 +13,7 @@ def destroy():
         [
             load_config,
             get_ssh_keys,
+            terraform.save_terraform_config,
             terraform.destroy_infrastructure,
             clean_filesystem,
         ]

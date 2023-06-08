@@ -13,10 +13,11 @@ def deploy():
     task_manager = TaskManager()
     task_manager.add_tasks(
         [
+            load_config,
             pack_sources,
             get_ssh_keys,
-            load_config,
             vpn.create_configs,
+            terraform.save_terraform_config,
             terraform.deploy_infrastructure,
             ansible.prepare_inventory,
         ]
