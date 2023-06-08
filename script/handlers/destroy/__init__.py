@@ -1,7 +1,7 @@
 from tasks import (
-    load_config,
-    get_ssh_keys,
     clean_filesystem,
+    get_ssh_keys,
+    load_config,
     terraform,
 )
 from tools import TaskManager

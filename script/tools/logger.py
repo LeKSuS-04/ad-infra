@@ -3,7 +3,6 @@ import threading
 
 from colorama import Fore, Style
 
-
 _COLORS = [
     Fore.BLACK,
     Fore.RED,

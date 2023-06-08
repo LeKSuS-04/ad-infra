@@ -1,8 +1,8 @@
 import tarfile
 
-from models import Config
-from tools import task, Syncer, Resource
 from constants.paths import GENERATED_PATH, INTERNAL_PATH, RESOURCES_PATH
+from models import Config
+from tools import Resource, Syncer, task
 
 
 @task(depends_on=[Resource.CONFIG])

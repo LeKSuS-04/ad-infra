@@ -13,7 +13,7 @@ def initialized():
 
 def initialize():
     if initialized():
-        raise EnvironmentError("OVPN output directories already initialized")
+        raise OSError("OVPN output directories already initialized")
 
     os.makedirs(config.TEAM_SERVER_DIR)
     os.makedirs(config.VULN_SERVER_DIR)

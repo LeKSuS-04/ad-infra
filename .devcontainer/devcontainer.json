@@ -1,5 +1,5 @@
 {
-	"name": "Development environment",
+	"name": "Ad-infra devcontainer",
 	"build": {
 		"context": "..",
 		"dockerfile": "../Dockerfile"
@@ -8,9 +8,41 @@
 		"ghcr.io/devcontainers-contrib/features/black:2": {
 			"version": "latest"
 		},
-		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
+		"ghcr.io/devcontainers-contrib/features/pipx-package": {
+			"package": "ruff"
+		}
 	},
 
 	"workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind,consistency=cached",
-	"workspaceFolder": "/app"
+	"workspaceFolder": "/app",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.black-formatter",
+				"charliermarsh.ruff"
+			],
+			"settings": {
+				"files.exclude": {
+					"**/.git": true,
+					"**/.svn": true,
+					"**/.hg": true,
+					"**/CVS": true,
+					"**/.DS_Store": true,
+					"**/Thumbs.db": true,
+					"**/__pycache__": true
+				},
+				"python.linting.enabled": false,
+				"python.linting.pylintEnabled": false,
+				"python.languageServer": "Pylance",
+				"python.analysis.typeCheckingMode": "basic",
+				"python.formatting.provider": "black",
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter"
+				}
+			}
+		}
+	}
 }

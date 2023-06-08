@@ -1,5 +1,4 @@
 import click
-
 import handlers
 
 
@@ -10,11 +9,11 @@ def cli():
 
 @cli.command("deploy")
 def deploy():
-    """Deploy everything"""
+    """Deploy everything."""
     handlers.deploy()
 
 
 @cli.command("destroy")
 def destroy():
-    """Destroy everything and clean up filesystem"""
+    """Destroy everything and clean up filesystem."""
     handlers.destroy()

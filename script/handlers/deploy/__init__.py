@@ -1,10 +1,10 @@
 from tasks import (
-    pack_sources,
+    ansible,
     get_ssh_keys,
     load_config,
-    vpn,
+    pack_sources,
     terraform,
-    ansible,
+    vpn,
 )
 from tools import TaskManager
 

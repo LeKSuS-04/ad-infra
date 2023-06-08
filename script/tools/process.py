@@ -1,5 +1,5 @@
 import subprocess
-from typing import Any, IO, cast
+from typing import IO, Any, cast
 
 from .logger import log
 

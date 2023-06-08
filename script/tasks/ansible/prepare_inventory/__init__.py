@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import cast
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from tools import task, Syncer, Resource
 from constants.paths import ANSIBLE_PATH, GENERATED_PATH
-
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from tools import Resource, Syncer, task
 
 TEMPLATE_PATH = Path(__file__).parent
 JINJA_ENV = Environment(

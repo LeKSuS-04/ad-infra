@@ -2,6 +2,7 @@
 # Modified a bit to fit this project better and work with newer versions of dependencies
 
 import os
+
 from constants.paths import GENERATED_PATH, INTERNAL_PATH
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

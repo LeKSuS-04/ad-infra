@@ -1,10 +1,10 @@
 import threading
-from typing import Callable
+from collections.abc import Callable
 from functools import wraps
 
+from .logger import log
 from .syncher import Syncer
 from .syncher.resources import Resource
-from .logger import log
 
 
 class TaskManager:
@@ -23,10 +23,11 @@ class TaskManager:
 
 
 def task(depends_on: list[Resource]):
-    """Wrapper for tasks that manages launch order and threading
+    """Manage launch order and threading for tasks.
 
     Task wrapped in this must have `Syncher` as a first argument and required resources from
-     `depends_on` as next few arguments"""
+    `depends_on` as next few arguments
+    """
 
     def decorator(func: Callable):
         @wraps(func)

@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
+
+from constants.paths import GENERATED_PATH
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-
-
-from tools import task, Syncer, Resource, log
-from constants.paths import GENERATED_PATH
+from tools import Resource, Syncer, log, task
 
 
 def _save_private(key: ec.EllipticCurvePrivateKey, path: Path):

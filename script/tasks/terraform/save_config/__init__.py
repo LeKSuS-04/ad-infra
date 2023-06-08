@@ -1,13 +1,12 @@
 from pathlib import Path
 from typing import cast
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
-from cryptography.hazmat.primitives import serialization
 
 from constants.paths import TERRAFORM_PATH
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from models import Config
-from tools import task, Syncer, Resource, log
-
+from tools import Resource, Syncer, log, task
 
 TEMPLATE_PATH = Path(__file__).parent
 JINJA_ENV = Environment(

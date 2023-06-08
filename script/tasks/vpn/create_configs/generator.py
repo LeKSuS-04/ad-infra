@@ -16,7 +16,7 @@ class ConfigGenerator:
         )
         self.vpn_server = vpn_server
         self.ca_cert, self.ca_key = crypto_utils.create_ca(
-            CN="cbsctf.live"  # FIXME: should we change this?
+            cn="cbsctf.live"  # FIXME: should we change this?
         )
         self.dhparam = crypto_utils.get_dhparam()
 

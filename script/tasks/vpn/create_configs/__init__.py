@@ -1,5 +1,6 @@
 from models.config import Config
-from tools import task, Syncer, Resource, log
+from tools import Resource, Syncer, log, task
+
 from . import ovpngen
 
 

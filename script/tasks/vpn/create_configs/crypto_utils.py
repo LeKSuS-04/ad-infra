@@ -16,11 +16,11 @@ def make_key_pair(algorithm=crypto.TYPE_RSA, num_bits=2048):
     return pkey
 
 
-def make_csr(pkey, CN, email=None, hash_algorithm="sha256WithRSAEncryption"):
+def make_csr(pkey, cn, email=None, hash_algorithm="sha256WithRSAEncryption"):
     req = crypto.X509Req()
     subj = req.get_subject()
 
-    subj.CN = CN
+    subj.CN = cn
 
     if email:
         subj.emailAddress = email
@@ -31,9 +31,9 @@ def make_csr(pkey, CN, email=None, hash_algorithm="sha256WithRSAEncryption"):
     return req
 
 
-def create_ca(CN, hash_algorithm="sha256WithRSAEncryption", *args):
+def create_ca(cn, hash_algorithm="sha256WithRSAEncryption", *args):
     ca_key = make_key_pair()
-    ca_req = make_csr(ca_key, CN=CN, *args)
+    ca_req = make_csr(ca_key, cn=cn, *args)
     ca_cert = crypto.X509()
     ca_cert.set_serial_number(0)
     ca_cert.gmtime_adj_notBefore(0)

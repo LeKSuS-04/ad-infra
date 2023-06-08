@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, PositiveInt, validator, conint
+from pydantic import BaseModel, PositiveInt, conint, validator
 
 
 class YandexCloudConfig(BaseModel):
@@ -16,7 +16,7 @@ class LoadedConfigTeams(BaseModel):
 
 
 class LoadedConfig(BaseModel):
-    """Structure of config.yaml"""
+    """Structure of config.yaml."""
 
     yandex_cloud: YandexCloudConfig
     src_path: Path
@@ -28,12 +28,12 @@ class LoadedTeamsItem(BaseModel):
 
 
 class LoadedTeams(BaseModel):
-    """Structure of teams.yaml"""
+    """Structure of teams.yaml."""
 
     teams: list[LoadedTeamsItem]
 
     @validator("teams")
-    def must_be_unique(cls, teams: list[LoadedTeamsItem]):
+    def must_be_unique(self, teams: list[LoadedTeamsItem]):
         for team in teams:
             if list(map(lambda t: t.name == team.name, teams)).count(True) > 1:
                 raise ValueError(f'Team "{team.name}" is registered multiple times')
@@ -60,10 +60,7 @@ class TerraformConfig(BaseModel):
 
 
 class Config(BaseModel):
-    """
-    Configuration, created by merging LoadedConfig, LoadedTeams and adding
-    a bit of magic
-    """
+    """Configuration, created by merging LoadedConfig, LoadedTeams and adding a bit of magic."""
 
     terraform_config: TerraformConfig
     src_path: Path

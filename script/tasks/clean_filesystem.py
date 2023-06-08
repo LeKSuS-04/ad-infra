@@ -2,8 +2,8 @@ import os
 import shutil
 from pathlib import Path
 
-from tools import task, Syncer, Resource, log
-from constants.paths import GENERATED_PATH, INTERNAL_PATH, ANSIBLE_PATH, TERRAFORM_PATH
+from constants.paths import ANSIBLE_PATH, GENERATED_PATH, INTERNAL_PATH, TERRAFORM_PATH
+from tools import Resource, Syncer, log, task
 
 
 def clean_directory(dir_path: Path):

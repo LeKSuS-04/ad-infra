@@ -1,5 +1,5 @@
-from tools import task, Syncer, Resource, process
 from constants.paths import TERRAFORM_PATH
+from tools import Resource, Syncer, process, task
 
 
 @task(depends_on=[Resource.TERRAFORM_CONFIG_READY])

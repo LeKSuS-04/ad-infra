@@ -1,5 +1,6 @@
 from constants.paths import TERRAFORM_PATH
-from tools import task, Syncer, Resource, process
+from tools import Resource, Syncer, process, task
+
 from .output_parser import save_resources
 
 

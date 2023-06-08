@@ -1,16 +1,16 @@
-import yaml
 from pathlib import Path
 
+import yaml
 from models import (
+    Config,
     LoadedConfig,
     LoadedTeams,
-    Config,
-    Team,
     LoadedTeamsItem,
+    Team,
     TerraformConfig,
     VMConfig,
 )
-from tools import task, Syncer, Resource, log
+from tools import Resource, Syncer, log, task
 
 
 def create_team(loaded: LoadedTeamsItem) -> Team:
@@ -22,7 +22,7 @@ def load_config(sync: Syncer):
     config_path = Path.cwd() / "config.yaml"
     teams_path = Path.cwd() / "teams.yaml"
 
-    with open(config_path, "r") as config_file, open(teams_path, "r") as teams_file:
+    with open(config_path) as config_file, open(teams_path) as teams_file:
         loaded_config = LoadedConfig.parse_obj(yaml.load(config_file, yaml.SafeLoader))
         log("Loaded and validated config.yaml")
 

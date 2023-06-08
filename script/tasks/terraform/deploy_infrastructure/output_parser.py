@@ -1,7 +1,8 @@
 import re
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
-from tools import Syncer, Resource
+from tools import Resource, Syncer
 
 
 class _TerraformOutputParser:
