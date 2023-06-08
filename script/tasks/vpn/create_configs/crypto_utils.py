@@ -46,9 +46,7 @@ def create_ca(cn, hash_algorithm="sha256WithRSAEncryption", *args):
     ca_cert.add_extensions(
         [
             crypto.X509Extension(b"basicConstraints", True, b"CA:TRUE"),
-            crypto.X509Extension(
-                b"subjectKeyIdentifier", False, b"hash", subject=ca_cert
-            ),
+            crypto.X509Extension(b"subjectKeyIdentifier", False, b"hash", subject=ca_cert),
         ]
     )
 
@@ -101,9 +99,7 @@ def create_slave_certificate(
     if is_server:
         extensions.extend(
             [
-                crypto.X509Extension(
-                    b"keyUsage", False, b"digitalSignature,keyEncipherment"
-                ),
+                crypto.X509Extension(b"keyUsage", False, b"digitalSignature,keyEncipherment"),
                 crypto.X509Extension(b"extendedKeyUsage", False, b"serverAuth"),
             ]
         )
@@ -156,10 +152,10 @@ def load_cert_file(path):
 
 
 def get_dhparam():
-    dhparam_url = "https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem"
-    p = subprocess.Popen(
-        ["curl", dhparam_url], stderr=subprocess.PIPE, stdout=subprocess.PIPE
+    dhparam_url = (
+        "https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem"
     )
+    p = subprocess.Popen(["curl", dhparam_url], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     stdout, _ = p.communicate()
     return stdout.decode().strip("\n")
 

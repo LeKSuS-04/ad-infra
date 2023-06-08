@@ -20,6 +20,7 @@ def deploy():
             terraform.save_terraform_config,
             terraform.deploy_infrastructure,
             ansible.prepare_inventory,
+            ansible.ping_all_hosts,
         ]
     )
     task_manager.wait_until_all_finished()

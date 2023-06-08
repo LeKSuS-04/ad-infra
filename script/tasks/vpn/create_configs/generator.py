@@ -101,9 +101,7 @@ class ConfigGenerator:
             team_num=team_num,
             static_key=static_key,
         )
-        ovpn_dump_path = os.path.join(
-            config.VULN_CLIENT_DIR, f"vuln{formatted_team}.ovpn"
-        )
+        ovpn_dump_path = os.path.join(config.VULN_CLIENT_DIR, f"vuln{formatted_team}.ovpn")
         self._dump_file(rendered, ovpn_dump_path)
 
         rendered = self._get_rendered(
@@ -113,9 +111,7 @@ class ConfigGenerator:
             team_num=team_num,
             static_key=static_key,
         )
-        conf_dump_path = os.path.join(
-            config.VULN_SERVER_DIR, f"vuln_server{formatted_team}.conf"
-        )
+        conf_dump_path = os.path.join(config.VULN_SERVER_DIR, f"vuln_server{formatted_team}.conf")
         self._dump_file(rendered, conf_dump_path)
 
     def generate_for_teams(self, team_list, per_team):

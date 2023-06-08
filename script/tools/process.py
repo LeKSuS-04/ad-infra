@@ -11,7 +11,7 @@ def process(cmd: str, **options: Any) -> bytes:
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        **options
+        **options,
     )
     stdout = b""
 

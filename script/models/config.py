@@ -33,7 +33,7 @@ class LoadedTeams(BaseModel):
     teams: list[LoadedTeamsItem]
 
     @validator("teams")
-    def must_be_unique(self, teams: list[LoadedTeamsItem]):
+    def must_be_unique(cls, teams: list[LoadedTeamsItem]):  # noqa: N805
         for team in teams:
             if list(map(lambda t: t.name == team.name, teams)).count(True) > 1:
                 raise ValueError(f'Team "{team.name}" is registered multiple times')
