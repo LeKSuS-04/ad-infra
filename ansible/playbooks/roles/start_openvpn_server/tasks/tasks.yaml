@@ -7,7 +7,7 @@
 
 - name: Copy files
   ansible.builtin.copy:
-    src: "/internal/vpn/{{item}}/server/"
+    src: "/internal/vpn/{{ item }}/server/"
     dest: /ovpn_configs
   loop:
     - jury
@@ -21,5 +21,5 @@
   register: openvpn_configs
 
 - name: Start OpenVPN daemon for each of config files
-  ansible.builtin.shell: "openvpn --config {{item.path}} --daemon"
+  ansible.builtin.shell: "openvpn --config {{ item.path }} --daemon"
   loop: "{{ openvpn_configs.files }}"
