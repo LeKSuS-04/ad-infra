@@ -57,11 +57,11 @@
 
 - name: Add ansible user to docker group
   ansible.builtin.user:
-    name: "{{ ansible_user }}"
+    name: "{{ item }}"
     append: yes
     groups: docker
     state: present
-  register: user_groups
+  loop: "{{ docker_users }}"
 
 - name: Reload SSH connection to apply group changes
   ansible.builtin.meta: reset_connection

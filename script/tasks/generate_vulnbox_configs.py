@@ -1,0 +1,28 @@
+from ipaddress import IPv4Address
+from random import choices
+from string import ascii_lowercase, digits
+
+from constants.paths import INTERNAL_PATH
+from models import VulnboxConfig
+from tools import Resource, Syncer, task
+
+
+def _random_string(alphabet: str = ascii_lowercase + digits, length: int = 32) -> str:
+    return "".join(choices(alphabet, k=length))
+
+
+@task(depends_on=[Resource.VULNBOX_HOSTS, Resource.VPN_CONFIGS_READY])
+def generate_vulnbox_configs(sync: Syncer, vulnbox_hosts: list[str], vpn_configs_ready: bool):
+    vulnbox_configs: list[VulnboxConfig] = []
+
+    for i, host in enumerate(vulnbox_hosts, start=1):
+        vunlbox_config = VulnboxConfig(
+            real_ip=IPv4Address(host),
+            game_ip=IPv4Address(f"10.{80 + i // 256}.{i % 256}.2"),
+            local_vpn_config_path=INTERNAL_PATH / "vpn" / "vuln" / "client" / f"vuln{i:03}.ovpn",
+            username="team",
+            password=_random_string(),
+        )
+        vulnbox_configs.append(vunlbox_config)
+
+    sync.set_resource(Resource.VULNBOX_CONFIGS, vulnbox_configs)

@@ -1,0 +1,19 @@
+---
+- name: Install OpenVPN client
+  ansible.builtin.apt:
+    pkg: openvpn=2.5.5-1ubuntu3
+    state: present
+    update_cache: yes
+
+- name: Make directory for VPN config file
+  ansible.builtin.file:
+    path: /vpn
+    state: directory
+
+- name: Copy OpenVPN config to host
+  ansible.builtin.copy:
+    src: "{{ vpn_client_file }}"
+    dest: /vpn/client.ovpn
+
+- name: Run OpenVPN client file
+  ansible.builtin.command: openvpn --config /vpn/client.ovpn --daemon

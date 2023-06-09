@@ -1,0 +1,14 @@
+---
+- name: Configure jury host
+  hosts: jury
+
+  tasks:
+    - name: Install docker
+      ansible.builtin.import_role:
+        name: install_docker
+
+    - name: Connect to game network
+      ansible.builtin.import_role:
+        name: connect_vpn_client
+      vars:
+        vpn_client_file: "{{ hostvars[inventory_hostname].vars.vpn_client_file }}"

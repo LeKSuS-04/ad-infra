@@ -1,12 +1,16 @@
 locals {
-  # Ubuntu 22.04 LTS
-  # https://cloud.yandex.ru/marketplace/products/yc/ubuntu-22-04-lts#product-ids
-  ubuntu_image_id = "fd8ps4vdhf5hhuj8obp2"
-
   shared_metadata = {
     serial-port-enable = 0
     user-data          = file("./cloud-init.yaml")
   }
+}
+
+resource "yandex_compute_image" "ubuntu-2204-lts" {
+  source_family = "ubuntu-2204-lts"
+}
+
+resource "yandex_compute_image" "nat-instance-ubuntu" {
+  source_family = "nat-instance-ubuntu"
 }
 
 resource "yandex_compute_instance" "bastion" {
@@ -21,7 +25,7 @@ resource "yandex_compute_instance" "bastion" {
 
   boot_disk {
     initialize_params {
-      image_id = local.ubuntu_image_id
+      image_id = yandex_compute_image.nat-instance-ubuntu.id
       type     = "network-ssd"
       size     = var.bastion_vm.ssd_gb
     }
@@ -48,7 +52,7 @@ resource "yandex_compute_instance" "vulnbox" {
 
   boot_disk {
     initialize_params {
-      image_id = local.ubuntu_image_id
+      image_id = yandex_compute_image.ubuntu-2204-lts.id
       type     = "network-ssd"
       size     = var.vulnbox_vm.ssd_gb
     }
@@ -74,7 +78,7 @@ resource "yandex_compute_instance" "jury" {
 
   boot_disk {
     initialize_params {
-      image_id = local.ubuntu_image_id
+      image_id = yandex_compute_image.ubuntu-2204-lts.id
       type     = "network-ssd"
       size     = var.jury_vm.ssd_gb
     }
@@ -100,7 +104,7 @@ resource "yandex_compute_instance" "vpn" {
 
   boot_disk {
     initialize_params {
-      image_id = local.ubuntu_image_id
+      image_id = yandex_compute_image.ubuntu-2204-lts.id
       type     = "network-ssd"
       size     = var.vpn_vm.ssd_gb
     }

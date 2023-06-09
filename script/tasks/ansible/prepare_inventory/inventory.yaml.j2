@@ -5,24 +5,31 @@ all:
         ansible_user: {{admin_username}}
         ansible_ssh_private_key_file: {{admin_ssh_key_file_path}}
 
-        team_count: {{team_count}}
-        network_open_time: {{network_open_time}}
-        timezone: {{timezone}}
-
       children:
         vulnboxes:
           vars:
             ansible_ssh_common_args: -o ProxyCommand="ssh -i {{admin_ssh_key_file_path}} -q -W %h:%p -o StrictHostKeyChecking=no {{admin_username}}@{{bastion_host}}"
-  
+
           hosts:
-            {%- for host in vulnbox_hosts %}
+            {%- for host, data in vulnbox_hosts.items() %}
             {{host}}:
+              vars:
+                vpn_client_file: {{data.vpn_file}}
+                username: {{data.user}}
+                password: {{data.password}}
             {%- endfor %}
-          
+
         vpn:
+          vars:
+            team_count: {{team_count}}
+            network_open_time: {{network_open_time}}
+            timezone: {{timezone}}
           hosts:
             {{vpn_host}}:
 
         jury:
           hosts:
             {{jury_host}}:
+              vars:
+                vpn_client_file: {{jury_vpn_client}}
+

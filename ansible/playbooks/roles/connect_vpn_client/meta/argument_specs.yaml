@@ -1,0 +1,9 @@
+---
+argument_specs:
+  main:
+    short_description: Main entrypoint for connect_vpn_client role
+    options:
+      vpn_client_file:
+        type: path
+        required: yes
+        description: Path to OpenVPN client config on local machine
