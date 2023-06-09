@@ -22,8 +22,9 @@
 - name: Download docker GPG key
   ansible.builtin.get_url:
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
-    dest: /etc/apt/keyrings/docker.gpg
+    dest: /etc/apt/keyrings/docker.asc
     mode: 0644
+    force: yes
   register: gpg_download
 
 - name: Get DEB architecture
@@ -60,7 +61,10 @@
     append: yes
     groups: docker
     state: present
-  notify: Reload SSH connection to apply group changes
+  register: user_groups
+
+- name: Reload SSH connection to apply group changes
+  ansible.builtin.meta: reset_connection
 
 - name: Make sure docker service is running and enable autostart on boot
   ansible.builtin.systemd:
