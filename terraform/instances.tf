@@ -6,10 +6,14 @@ locals {
 }
 
 resource "yandex_compute_image" "ubuntu-2204-lts" {
+  description   = "Ubuntu 22.04 LTS image"
+  name          = "ubuntu-2204-lts"
   source_family = "ubuntu-2204-lts"
 }
 
 resource "yandex_compute_image" "nat-instance-ubuntu" {
+  description   = "NAT image based on Ubuntu 18.04 LTS with predefined routing and ip forwarding rules"
+  name          = "nat-instance-ubuntu-1804-lts"
   source_family = "nat-instance-ubuntu"
 }
 

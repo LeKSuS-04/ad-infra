@@ -22,11 +22,12 @@ class TaskManager:
             task.join()
 
 
-def task(depends_on: list[Resource]):
+def task(depends_on: list[Resource] = [], depends_on_boolean: list[Resource] = []):
     """Manage launch order and threading for tasks.
 
     Task wrapped in this must have `Syncher` as a first argument and required resources from
-    `depends_on` as next few arguments
+    `depends_on` as next few arguments. If resource is required to exist, but is not needed
+    as a direct argument, it must be placed into `depends_on_boolean` argument.
     """
 
     def decorator(func: Callable):
@@ -34,6 +35,9 @@ def task(depends_on: list[Resource]):
         def wrapper():
             task_name = func.__name__
             sync = Syncer.get_instance()
+            for key in depends_on_boolean:
+                sync.wait_for(key)
+
             resources = []
             for key in depends_on:
                 resources.append(sync.get_resource(key))

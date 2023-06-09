@@ -9,19 +9,19 @@ def run_playbook(playbook_name: str) -> bytes:
     return run_with_ansible_env(f"ansible-playbook '{playbook_path}'")
 
 
-@task(depends_on=[Resource.VPN_HOST_UP])
-def configure_vpn(sync: Syncer, vpn_host_up: bool):
+@task(depends_on_boolean=[Resource.VPN_HOST_UP])
+def configure_vpn(sync: Syncer):
     run_playbook("vpn_conf.yaml")
     sync.set_resource(Resource.VPN_HOST_CONFIGURED)
 
 
-@task(depends_on=[Resource.JURY_HOST_UP])
-def configure_jury(sync: Syncer, jury_host_up: bool):
+@task(depends_on_boolean=[Resource.JURY_HOST_UP])
+def configure_jury(sync: Syncer):
     run_playbook("jury_conf.yaml")
     sync.set_resource(Resource.JURY_HOST_CONFIGURED)
 
 
-@task(depends_on=[Resource.ALL_VULNBOX_HOSTS_UP])
-def configure_vulnboxes(sync: Syncer, all_vunlbox_hosts_up: bool):
+@task(depends_on_boolean=[Resource.ALL_VULNBOX_HOSTS_UP])
+def configure_vulnboxes(sync: Syncer):
     run_playbook("vulnboxes_conf.yaml")
     sync.set_resource(Resource.ALL_VULNBOX_HOSTS_CONFIGURED)

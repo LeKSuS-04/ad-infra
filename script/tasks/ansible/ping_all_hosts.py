@@ -22,12 +22,12 @@ def get_status_str(status_up: bool) -> str:
         Resource.JURY_HOST,
         Resource.VPN_HOST,
         Resource.VULNBOX_HOSTS,
+    ],
+    depends_on_boolean=[
         Resource.ANSIBLE_INVENTORY_READY,
-    ]
+    ],
 )
-def ping_all_hosts(
-    sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: str, ansible_inventory_ready: bool
-):
+def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: str):
     jury_up = False
     vpn_up = False
     all_vulnboxes_up = False

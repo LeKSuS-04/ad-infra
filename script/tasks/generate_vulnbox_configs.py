@@ -11,8 +11,8 @@ def _random_string(alphabet: str = ascii_lowercase + digits, length: int = 32) -
     return "".join(choices(alphabet, k=length))
 
 
-@task(depends_on=[Resource.VULNBOX_HOSTS, Resource.VPN_CONFIGS_READY])
-def generate_vulnbox_configs(sync: Syncer, vulnbox_hosts: list[str], vpn_configs_ready: bool):
+@task(depends_on=[Resource.VULNBOX_HOSTS], depends_on_boolean=[Resource.VPN_CONFIGS_READY])
+def generate_vulnbox_configs(sync: Syncer, vulnbox_hosts: list[str]):
     vulnbox_configs: list[VulnboxConfig] = []
 
     for i, host in enumerate(vulnbox_hosts, start=1):

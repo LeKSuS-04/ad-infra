@@ -61,7 +61,7 @@
     append: yes
     groups: docker
     state: present
-  loop: "{{ docker_users }}"
+  loop: "{{ query('list', docker_users) }}"
 
 - name: Reload SSH connection to apply group changes
   ansible.builtin.meta: reset_connection

@@ -28,8 +28,8 @@ def verbose_remove(file_path: Path):
         log(f"Didn't remove \"{file_path.name}\" because it doesn't exist")
 
 
-@task(depends_on=[Resource.TERRAFORM_DESTROYED])
-def clean_filesystem(sync: Syncer, terraform_testroyed: bool):
+@task(depends_on_boolean=[Resource.TERRAFORM_DESTROYED])
+def clean_filesystem(sync: Syncer):
     clean_directory(GENERATED_PATH)
     clean_directory(INTERNAL_PATH)
 
