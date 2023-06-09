@@ -4,6 +4,7 @@ from typing import cast
 from constants.paths import ANSIBLE_PATH, GENERATED_PATH
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tools import Resource, Syncer, task
+from models import Config
 
 TEMPLATE_PATH = Path(__file__).parent
 JINJA_ENV = Environment(
@@ -13,6 +14,7 @@ JINJA_ENV = Environment(
 
 @task(
     depends_on=[
+        Resource.CONFIG,
         Resource.ADMIN_SSH_KEY_FILE,
         Resource.BASTION_HOST,
         Resource.JURY_HOST,
@@ -22,6 +24,7 @@ JINJA_ENV = Environment(
 )
 def prepare_inventory(
     sync: Syncer,
+    config: Config,
     admin_ssh_key_file: str,
     bastion_host: str,
     jury_host: str,
@@ -34,6 +37,9 @@ def prepare_inventory(
         rendered = inventory_template.render(
             admin_username="admin",
             admin_ssh_key_file_path=GENERATED_PATH / admin_ssh_key_file,
+            team_count=len(config.teams),
+            network_open_time=config.network.open_time,
+            timezone=config.network.timezone,
             bastion_host=bastion_host,
             jury_host=jury_host,
             vpn_host=vpn_host,

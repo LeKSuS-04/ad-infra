@@ -7,4 +7,6 @@
       ansible.builtin.import_role:
         name: start_openvpn_server
 
-    # TODO: schedule network
+    - name: Schedule network openning
+      ansible.builtin.import_role:
+        name: schedule_network_openning

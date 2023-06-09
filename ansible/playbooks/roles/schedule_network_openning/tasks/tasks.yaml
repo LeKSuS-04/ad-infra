@@ -1,0 +1,33 @@
+---
+- name: Install dependencies
+  ansible.builtin.apt:
+    pkg:
+      - python3=3.10.6-1~22.04
+      - python3-pip=22.0.2+dfsg-1ubuntu0.2
+      - iptables-persistent=1.0.16
+      - at=3.2.5-1ubuntu1
+    state: present
+    update_cache: yes
+
+- name: Copy ad_net_control script to remote
+  ansible.builtin.copy:
+    src: ad_net_control
+    dest: /
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Make script file executable
+  ansible.builtin.file:
+    path: /ad_net_control/net_control.py
+    mode: 0755
+
+- name: Initialize network
+  ansible.builtin.command: "/ad_net_control/net_control.py init --teams {{ team_count }}"
+
+- name: Schedule network openning using `at`
+  custom.at:
+    command: "/ad_net_control/net_control.py open --teams {{ team_count }}"
+    exact_time: "{{ network_open_time.strftime('%Y%m%d%H%M.%S') }}"
+    unique: yes
+  environment:
+    TZ: "{{ timezone }}"

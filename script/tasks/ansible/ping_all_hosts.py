@@ -1,9 +1,9 @@
-import os
 import re
 from time import sleep
 
-from constants.paths import ANSIBLE_PATH
-from tools import Resource, Syncer, log, process, task
+from tools import Resource, Syncer, log, task
+
+from .environment import run_with_ansible_env
 
 _ATTEMPT_INTERVAL_SECONDS = 5
 
@@ -28,16 +28,13 @@ def get_status_str(status_up: bool) -> str:
 def ping_all_hosts(
     sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: str, ansible_inventory_ready: bool
 ):
-    environment = os.environ.copy()
-    environment["ANSIBLE_CONFIG"] = str(ANSIBLE_PATH / "ansible.cfg")
-
     jury_up = False
     vpn_up = False
     all_vulnboxes_up = False
 
     while True:
         log("Pinging hosts")
-        output = process("ansible all -m ping", env=environment)
+        output = run_with_ansible_env("ansible all -m ping")
         active_hosts = get_active_hosts_from_output(output.decode())
 
         if not jury_up:

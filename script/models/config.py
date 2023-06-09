@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
@@ -15,11 +16,17 @@ class LoadedConfigTeams(BaseModel):
     add_npc: bool
 
 
+class NetworkConfig(BaseModel):
+    open_time: datetime
+    timezone: str
+
+
 class LoadedConfig(BaseModel):
     """Structure of config.yaml."""
 
     yandex_cloud: YandexCloudConfig
     src_path: Path
+    network: NetworkConfig
     teams: LoadedConfigTeams
 
 
@@ -64,5 +71,6 @@ class Config(BaseModel):
 
     terraform_config: TerraformConfig
     src_path: Path
+    network: NetworkConfig
     teams: list[Team]
     players_per_team: PositiveInt

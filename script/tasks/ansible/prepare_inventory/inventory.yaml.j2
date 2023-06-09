@@ -5,6 +5,10 @@ all:
         ansible_user: {{admin_username}}
         ansible_ssh_private_key_file: {{admin_ssh_key_file_path}}
 
+        team_count: {{team_count}}
+        network_open_time: {{network_open_time}}
+        timezone: {{timezone}}
+
       children:
         vulnboxes:
           vars:

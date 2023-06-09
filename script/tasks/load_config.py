@@ -6,6 +6,7 @@ from models import (
     LoadedConfig,
     LoadedTeams,
     LoadedTeamsItem,
+    NetworkConfig,
     Team,
     TerraformConfig,
     VMConfig,
@@ -60,6 +61,7 @@ def load_config(sync: Syncer):
     config = Config(
         terraform_config=terraform_config,
         src_path=loaded_config.src_path,
+        network=loaded_config.network,
         teams=list(map(create_team, loaded_teams.teams)),
         players_per_team=loaded_config.teams.players_per_team,
     )

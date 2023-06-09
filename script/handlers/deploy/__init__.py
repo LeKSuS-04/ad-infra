@@ -2,7 +2,6 @@ from tasks import (
     ansible,
     get_ssh_keys,
     load_config,
-    pack_sources,
     terraform,
     vpn,
 )
@@ -14,7 +13,6 @@ def deploy():
     task_manager.add_tasks(
         [
             load_config,
-            pack_sources,
             get_ssh_keys,
             vpn.create_configs,
             terraform.save_terraform_config,

@@ -1,0 +1,3 @@
+---
+- name: Reload SSH connection to apply group changes
+  ansible.builtin.meta: reset_connection
