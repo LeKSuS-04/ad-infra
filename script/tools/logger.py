@@ -23,14 +23,30 @@ def _hash_to_five_digits(n: int) -> int:
     return n
 
 
-def _get_short_thread_name() -> str:
+def _get_short_thread_name(length: int = 9) -> str:
+    initial_budget_per_part = 3
     thread_name = threading.current_thread().name.upper()
     short_name = ""
+
     name_parts = thread_name.split("_")
-    for part in name_parts:
-        short_name += part[:3]
-    short_name += name_parts[-1][3:]
-    return short_name[:8].ljust(8, " ")
+    budget = length
+    budget_per_part = [0] * len(name_parts)
+
+    for i, part in enumerate(name_parts):
+        available_budget = min(len(part), budget, initial_budget_per_part)
+        budget -= available_budget
+        budget_per_part[i] = available_budget
+
+    for i, part in reversed(list(enumerate(name_parts))):
+        budget += budget_per_part[i]
+        available_budget = min(len(part), budget)
+        budget -= available_budget
+        budget_per_part[i] = available_budget
+
+    for available_budget, part in zip(budget_per_part, name_parts):
+        short_name += part[:available_budget]
+
+    return short_name.ljust(length, " ")
 
 
 def log(data, **print_kwargs):
