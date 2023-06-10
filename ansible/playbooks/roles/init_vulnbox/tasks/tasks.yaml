@@ -1,0 +1,37 @@
+---
+- name: Install development tools
+  ansible.builtin.apt:
+    pkg:
+      # Versions are not pinned since these packages are not used in any scripts,
+      # so even breaking changes to them won't change anything in script runtime
+      - python3
+      - python3-pip
+      - gcc
+      - g++
+      - gdb
+      - golang
+      - nodejs
+      - npm
+      - rustc
+      - cargo
+      - make
+      - cmake
+      - vim
+      - nano
+      - git
+      - zip
+      - unzip
+    state: present
+    update_cache: true
+
+- name: Create user for team
+  ansible.builtin.user:
+    name: "{{ username }}"
+    password: "{{ password | password_hash('sha512') }}"
+    append: true
+    groups:
+      - sudo
+    shell: /bin/bash
+    create_home: true
+    state: present
+  register: user

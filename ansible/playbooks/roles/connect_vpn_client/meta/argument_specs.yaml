@@ -5,5 +5,5 @@ argument_specs:
     options:
       vpn_client_file:
         type: path
-        required: yes
+        required: true
         description: Path to OpenVPN client config on local machine

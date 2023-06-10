@@ -1,0 +1,5 @@
+---
+services_local_path: /services
+services_remote_path: /services
+owner: "{{ ansible_user }}"
+owner_group: "{{ owner }}"

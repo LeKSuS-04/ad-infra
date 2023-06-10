@@ -9,14 +9,29 @@
       - containerd
       - runc
     state: absent
-    update_cache: yes
+    update_cache: true
 
 - name: Install dependencies
   ansible.builtin.apt:
     pkg:
+      # For docker installation; versions not pinned as in the official docker installation guide
       - ca-certificates
       - curl
       - gnupg
+
+      # For docker SDKs for python to allow ansible to work with docker
+      - python3=3.10.6-1~22.04
+      - python3-pip=22.0.2+dfsg-1ubuntu0.2
+    state: present
+
+- name: Install python packages for community.docker module
+  ansible.builtin.pip:
+    name:
+      - docker==6.1.3
+      - pyyaml==5.4.1
+
+      # It's a shame that Ansible doesn't support `docker compose``
+      - docker-compose==1.29.2
     state: present
 
 - name: Download docker GPG key
@@ -24,7 +39,7 @@
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
     dest: /etc/apt/keyrings/docker.asc
     mode: 0644
-    force: yes
+    force: true
   register: gpg_download
 
 - name: Get DEB architecture
@@ -33,12 +48,12 @@
 
 - name: Add docker repository into sources list
   ansible.builtin.apt_repository:
-    repo: |
+    repo: >
       deb [arch={{ deb_architecture.stdout }} signed-by={{ gpg_download.dest }}]
       https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
     state: present
     filename: docker.list
-    update_cache: yes
+    update_cache: true
 
 - name: Install docker
   ansible.builtin.apt:
@@ -58,10 +73,10 @@
 - name: Add ansible user to docker group
   ansible.builtin.user:
     name: "{{ item }}"
-    append: yes
+    append: true
     groups: docker
     state: present
-  loop: "{{ query('list', docker_users) }}"
+  loop: "{{ docker_users }}"
 
 - name: Reload SSH connection to apply group changes
   ansible.builtin.meta: reset_connection
@@ -70,7 +85,7 @@
   ansible.builtin.systemd:
     name: "{{ item }}"
     state: started
-    enabled: yes
+    enabled: true
   loop:
     - docker.service
     - containerd.service

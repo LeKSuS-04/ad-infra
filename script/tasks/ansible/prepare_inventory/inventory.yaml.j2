@@ -9,6 +9,7 @@ all:
         vulnboxes:
           vars:
             ansible_ssh_common_args: -o ProxyCommand="ssh -i {{admin_ssh_key_file_path}} -q -W %h:%p -o StrictHostKeyChecking=no {{admin_username}}@{{bastion_host}}"
+            services_path: {{services_path}}
 
           hosts:
             {%- for host, data in vulnbox_hosts.items() %}

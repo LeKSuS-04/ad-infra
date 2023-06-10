@@ -3,7 +3,7 @@
   ansible.builtin.apt:
     pkg: openvpn=2.5.5-1ubuntu3
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Copy files
   ansible.builtin.copy:

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import cast
 
-from constants.paths import ANSIBLE_PATH, GENERATED_PATH, INTERNAL_PATH
+from constants.paths import ANSIBLE_PATH, GENERATED_PATH, INTERNAL_PATH, RESOURCES_PATH
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from models import Config, VulnboxConfig
 from tools import Resource, Syncer, task
@@ -47,6 +47,7 @@ def prepare_inventory(
         jury_host=jury_host,
         jury_vpn_client=INTERNAL_PATH / "vpn" / "jury" / "client" / "config.ovpn",
         #
+        services_path=RESOURCES_PATH / config.src_path / "services",
         vulnbox_hosts={
             host.real_ip: dict(
                 vpn_file=host.local_vpn_config_path,

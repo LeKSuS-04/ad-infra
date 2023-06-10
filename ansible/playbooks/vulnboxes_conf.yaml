@@ -2,17 +2,38 @@
 - name: Configure vulnbox hosts
   hosts: vulnboxes
 
-  tasks:
-    - name: Install docker
-      ansible.builtin.import_role:
-        name: install_docker
+  roles:
+    # This step is required because this playbook switches to `team` user
+    # while configuring vulnbox. That means that SSH connection and command
+    # execution are both done by unprivileged users. Installing ACL (namely,
+    # sysfacl) allows ansible to resolve this issue.
+    # More thorough explanations of this can be found by this link:
+    # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-an-unprivileged-user
+    - name: Install Access Control List utils
+      role: install_acl
+
+    # Registers variable "user"
+    - name: Initialize vulnboxes with team user and dev tools
+      role: init_vulnbox
+      vars:
+        username: "{{ hostvars[inventory_hostname].vars.username }}"
+        password: "{{ hostvars[inventory_hostname].vars.password }}"
+
+    - name: Install and configure docker engine
+      role: install_docker
       vars:
         docker_users:
           - "{{ ansible_user }}"
           - "{{ hostvars[inventory_hostname].vars.username }}"
 
-    - name: Connect to game network
-      ansible.builtin.import_role:
-        name: connect_vpn_client
+    - name: Connect to the game network
+      role: connect_vpn_client
       vars:
         vpn_client_file: "{{ hostvars[inventory_hostname].vars.vpn_client_file }}"
+
+    - name: Start game services
+      role: start_services
+      vars:
+        services_local_path: "{{ services_path }}"
+        services_remote_path: "{{ [user.home, 'services' ] | path_join }}"
+        owner: "{{ hostvars[inventory_hostname].vars.username }}"

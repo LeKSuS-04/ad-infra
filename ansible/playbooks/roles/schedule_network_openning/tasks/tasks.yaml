@@ -7,7 +7,7 @@
       - iptables-persistent=1.0.16
       - at=3.2.5-1ubuntu1
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Copy ad_net_control script to remote
   ansible.builtin.copy:
@@ -28,6 +28,6 @@
   custom.at:
     command: "/ad_net_control/net_control.py open --teams {{ team_count }}"
     exact_time: "{{ network_open_time.strftime('%Y%m%d%H%M.%S') }}"
-    unique: yes
+    unique: true
   environment:
     TZ: "{{ timezone }}"
