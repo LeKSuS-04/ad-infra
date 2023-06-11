@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-  # noqa: UP009
 
-# Modification of official `ansible.posix.at` module, with original being located here:
-# Added support for `exact_time` option
+# Modification of official `ansible.posix.at` module, added support for `exact_time` option
+# Original module can be found here:
 # https://github.com/ansible-collections/ansible.posix/blob/main/plugins/modules/at.py
 
 # Copyright: (c) 2014, Richard Isaacson <richard.c.isaacson@gmail.com>

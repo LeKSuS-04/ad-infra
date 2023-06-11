@@ -6,8 +6,8 @@
     # This step is required because this playbook switches to `team` user
     # while configuring vulnbox. That means that SSH connection and command
     # execution are both done by unprivileged users. Installing ACL (namely,
-    # sysfacl) allows ansible to resolve this issue.
-    # More thorough explanations of this can be found by this link:
+    # setfacl) allows ansible to resolve this issue.
+    # More thorough explanation of this can be found here:
     # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-an-unprivileged-user
     - name: Install Access Control List utils
       role: install_acl
