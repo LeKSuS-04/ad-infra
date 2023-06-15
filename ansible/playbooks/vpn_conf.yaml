@@ -1,12 +1,11 @@
 ---
 - name: Configure VPN host
   hosts: vpn
-
-  tasks:
+  roles:
     - name: Run OpenVPN server configs
-      ansible.builtin.import_role:
-        name: start_openvpn_server
+      role: start_openvpn_server
+      vars:
+        vpn_server_config_local_paths: "{{ vpn_server_files }}"
 
     - name: Schedule network openning
-      ansible.builtin.import_role:
-        name: schedule_network_openning
+      role: schedule_network_openning

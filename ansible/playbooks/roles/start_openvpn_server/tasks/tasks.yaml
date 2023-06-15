@@ -7,6 +7,6 @@
 
 - name: Copy and run each config file
   ansible.builtin.include_tasks: run_config_file.yaml
-  loop: "{{ openvpn_configs.files }}"
+  loop: "{{ vpn_server_config_local_paths }}"
   loop_control:
     loop_var: vpn_config_local_path
