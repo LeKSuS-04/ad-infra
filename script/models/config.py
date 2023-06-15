@@ -47,7 +47,7 @@ class LoadedConfig(BaseModel):
     """Structure of config.yaml."""
 
     yandex_cloud: YandexCloudConfig
-    src_path: Path
+    src_dirname: Path
     admin: ForcadAdminConfig
     game: GameConfig
     tasks: list[ForcadTaskConfig]
@@ -95,7 +95,7 @@ class Config(BaseModel):
     """Configuration, created by merging LoadedConfig, LoadedTeams and adding a bit of magic."""
 
     terraform_config: TerraformConfig
-    src_path: Path
+    src_dirname: Path
     game: GameConfig
     tasks: list[ForcadTaskConfig]
     forcad_admin: ForcadAdminConfig

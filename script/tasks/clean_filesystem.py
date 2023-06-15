@@ -2,7 +2,13 @@ import os
 import shutil
 from pathlib import Path
 
-from constants.paths import ANSIBLE_PATH, GENERATED_PATH, INTERNAL_PATH, TERRAFORM_PATH
+from constants.paths import (
+    ANSIBLE_INVENTORY_PATH,
+    PRIVATE_GENERATED_DIR,
+    PUBLIC_GENERATED_DIR,
+    TERRAFORM_CLOUD_INIT_CONFIG_PATH,
+    TERRAFORM_CONFIG_PATH,
+)
 from tools import Resource, Syncer, log, task
 
 
@@ -30,13 +36,12 @@ def verbose_remove(file_path: Path):
 
 @task(depends_on_boolean=[Resource.TERRAFORM_DESTROYED])
 def clean_filesystem(sync: Syncer):
-    clean_directory(GENERATED_PATH)
-    clean_directory(INTERNAL_PATH)
+    clean_directory(PUBLIC_GENERATED_DIR)
+    clean_directory(PRIVATE_GENERATED_DIR)
 
-    ansible_inventory = ANSIBLE_PATH / "inventory.yaml"
-    verbose_remove(ansible_inventory)
+    verbose_remove(ANSIBLE_INVENTORY_PATH)
 
-    cloud_init_config = TERRAFORM_PATH / "cloud-init.yaml"
-    verbose_remove(cloud_init_config)
+    verbose_remove(TERRAFORM_CONFIG_PATH)
+    verbose_remove(TERRAFORM_CLOUD_INIT_CONFIG_PATH)
 
     sync.set_resource(Resource.FILESYSTEM_CLEANED)

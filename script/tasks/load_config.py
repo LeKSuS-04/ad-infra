@@ -1,8 +1,8 @@
 from ipaddress import IPv4Address
 from itertools import count
-from pathlib import Path
 
 import yaml
+from constants.paths import CONFIG_PATH, TEAMS_CONFIG_PATH
 from models import (
     Config,
     LoadedConfig,
@@ -22,10 +22,7 @@ def create_team(loaded: LoadedTeamsItem, team_number: int) -> Team:
 
 @task(depends_on=[])
 def load_config(sync: Syncer):
-    config_path = Path.cwd() / "config.yaml"
-    teams_path = Path.cwd() / "teams.yaml"
-
-    with open(config_path) as config_file, open(teams_path) as teams_file:
+    with open(CONFIG_PATH) as config_file, open(TEAMS_CONFIG_PATH) as teams_file:
         loaded_config = LoadedConfig.parse_obj(yaml.load(config_file, yaml.SafeLoader))
         log("Loaded and validated config.yaml")
 
@@ -62,7 +59,7 @@ def load_config(sync: Syncer):
 
     config = Config(
         terraform_config=terraform_config,
-        src_path=loaded_config.src_path,
+        src_dirname=loaded_config.src_dirname,
         game=loaded_config.game,
         forcad_admin=loaded_config.admin,
         tasks=loaded_config.tasks,

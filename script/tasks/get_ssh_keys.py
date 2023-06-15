@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from constants.paths import GENERATED_PATH
+from constants.paths import PRIV_SSH_KEY_FILE_PATH, PUB_SSH_KEY_FILE_PATH
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from tools import Resource, Syncer, log, task
@@ -38,34 +38,30 @@ def _load_private(path: Path) -> ec.EllipticCurvePrivateKey:
         return key
 
 
-def _load_existing_ssh_key(sync: Syncer, priv_key_path: Path):
-    sync.set_resource(Resource.ADMIN_SSH_KEY_FILE, priv_key_path)
+def _load_existing_ssh_key(sync: Syncer):
+    sync.set_resource(Resource.ADMIN_SSH_KEY_FILE_SAVED)
     log("Found existing SSH key")
 
-    key = _load_private(priv_key_path)
+    key = _load_private(PRIV_SSH_KEY_FILE_PATH)
     sync.set_resource(Resource.ADMIN_SSH_KEY, key)
     log("SSH key loaded")
 
 
-def _generate_new_ssh_key(sync: Syncer, pub_key_path: Path, priv_key_path: Path):
+def _generate_new_ssh_key(sync: Syncer):
     log("Generating SSH key")
     key = ec.generate_private_key(ec.SECP256R1())
     sync.set_resource(Resource.ADMIN_SSH_KEY, key)
     log("SSH key generated")
 
-    _save_private(key, priv_key_path)
-    _save_public(key, pub_key_path)
+    _save_private(key, PRIV_SSH_KEY_FILE_PATH)
+    _save_public(key, PUB_SSH_KEY_FILE_PATH)
     log("SSH key saved")
-    sync.set_resource(Resource.ADMIN_SSH_KEY_FILE, priv_key_path)
+    sync.set_resource(Resource.ADMIN_SSH_KEY_FILE_SAVED)
 
 
 @task(depends_on=[])
 def get_ssh_keys(sync: Syncer):
-    ssh_key_file = "id_ecdsa"
-    priv_key_path = GENERATED_PATH / ssh_key_file
-    pub_key_path = GENERATED_PATH / f"{ssh_key_file}.pub"
-
-    if priv_key_path.exists() or pub_key_path.exists():
-        _load_existing_ssh_key(sync, priv_key_path)
+    if PRIV_SSH_KEY_FILE_PATH.exists() and PUB_SSH_KEY_FILE_PATH.exists():
+        _load_existing_ssh_key(sync)
     else:
-        _generate_new_ssh_key(sync, pub_key_path, priv_key_path)
+        _generate_new_ssh_key(sync)

@@ -6,7 +6,7 @@ class Resource(Enum):
     CONFIG = auto()
     VPN_CONFIGS_READY = auto()
     ADMIN_SSH_KEY = auto()
-    ADMIN_SSH_KEY_FILE = auto()
+    ADMIN_SSH_KEY_FILE_SAVED = auto()
     TERRAFORM_CONFIG_READY = auto()
     INFRASTRUCTURE_READY = auto()
     ANSIBLE_INVENTORY_READY = auto()

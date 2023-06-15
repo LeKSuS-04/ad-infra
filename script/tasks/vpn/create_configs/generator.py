@@ -1,8 +1,16 @@
 # Taken from https://github.com/pomo-mondreganto/OVPNGen/blob/master/generator.py
 # Modified a bit to fit this project better and work with newer versions of dependencies
 
-import os
+from pathlib import Path
 
+from constants.paths import (
+    VPN_JURY_CLIENT_PATH,
+    VPN_JURY_SERVER_PATH,
+    vpn_team_client_path,
+    vpn_team_server_path,
+    vpn_vunlbox_client_path,
+    vpn_vunlbox_server_path,
+)
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import config, crypto_utils
@@ -53,7 +61,7 @@ class ConfigGenerator:
         return rendered
 
     @staticmethod
-    def _dump_file(rendered, filename):
+    def _dump_file(rendered, filename: Path):
         with open(filename, "w") as f:
             f.write(rendered)
 
@@ -65,9 +73,6 @@ class ConfigGenerator:
         static_key = crypto_utils.generate_static_key()
         formatted_team = self.format_team_num(team_num)
 
-        team_client_dir = os.path.join(config.TEAM_CLIENT_DIR, f"team{formatted_team}")
-        os.makedirs(team_client_dir, exist_ok=True)
-
         for player_num in range(1, per_team + 1):
             client_name = f"team{formatted_team}_{player_num}"
             rendered = self._get_rendered(
@@ -77,8 +82,7 @@ class ConfigGenerator:
                 team_num=team_num,
                 static_key=static_key,
             )
-            ovpn_dump_path = os.path.join(team_client_dir, f"{client_name}.ovpn")
-            self._dump_file(rendered, ovpn_dump_path)
+            self._dump_file(rendered, vpn_team_client_path(team_num, player_num))
 
         server_name = f"team_server{formatted_team}"
         rendered = self._get_rendered(
@@ -88,11 +92,9 @@ class ConfigGenerator:
             team_num=team_num,
             static_key=static_key,
         )
-        conf_dump_path = os.path.join(config.TEAM_SERVER_DIR, f"{server_name}.conf")
-        self._dump_file(rendered, conf_dump_path)
+        self._dump_file(rendered, vpn_team_server_path(team_num))
 
     def _generate_vuln(self, team_num):
-        formatted_team = self.format_team_num(team_num)
         static_key = crypto_utils.generate_static_key()
         rendered = self._get_rendered(
             template="vuln_client.j2",
@@ -101,8 +103,7 @@ class ConfigGenerator:
             team_num=team_num,
             static_key=static_key,
         )
-        ovpn_dump_path = os.path.join(config.VULN_CLIENT_DIR, f"vuln{formatted_team}.ovpn")
-        self._dump_file(rendered, ovpn_dump_path)
+        self._dump_file(rendered, vpn_vunlbox_client_path(team_num))
 
         rendered = self._get_rendered(
             template="vuln_server.j2",
@@ -111,8 +112,7 @@ class ConfigGenerator:
             team_num=team_num,
             static_key=static_key,
         )
-        conf_dump_path = os.path.join(config.VULN_SERVER_DIR, f"vuln_server{formatted_team}.conf")
-        self._dump_file(rendered, conf_dump_path)
+        self._dump_file(rendered, vpn_vunlbox_server_path(team_num))
 
     def generate_for_teams(self, team_list, per_team):
         for team_num in team_list:
@@ -131,8 +131,7 @@ class ConfigGenerator:
             team_num=None,
             static_key=static_key,
         )
-        ovpn_dump_path = os.path.join(config.JURY_CLIENT_DIR, "config.ovpn")
-        self._dump_file(rendered, ovpn_dump_path)
+        self._dump_file(rendered, VPN_JURY_CLIENT_PATH)
 
         rendered = self._get_rendered(
             template="jury_server.j2",
@@ -141,5 +140,4 @@ class ConfigGenerator:
             team_num=None,
             static_key=static_key,
         )
-        conf_dump_path = os.path.join(config.JURY_SERVER_DIR, "jury.conf")
-        self._dump_file(rendered, conf_dump_path)
+        self._dump_file(rendered, VPN_JURY_SERVER_PATH)

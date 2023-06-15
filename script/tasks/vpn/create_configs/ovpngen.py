@@ -1,27 +1,44 @@
 # Taken from https://github.com/pomo-mondreganto/OVPNGen/blob/master/gen.py
 # Modified a bit to fit this project better and work with newer versions of dependencies
 
-import os
+from pathlib import Path
 
-from . import config, generator
+from constants.paths import (
+    VPN_JURY_CLIENT_PATH,
+    VPN_JURY_SERVER_PATH,
+    vpn_team_client_path,
+    vpn_team_server_path,
+    vpn_vunlbox_client_path,
+    vpn_vunlbox_server_path,
+)
+from models import Config
+
+from . import generator
 
 
 def initialized():
-    paths = (config.PRIVATE_CONFIGS_PATH, config.PUBLIC_CONFIGS_PATH)
-    return any(path.exists() for path in paths)
+    # All configs are generated at once, so we can check if all they've
+    # been initialized just by checking existance of one of them.
+    return VPN_JURY_CLIENT_PATH.exists()
 
 
-def initialize():
+def ensure_file_directory_exists(file_path: Path):
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def initialize(config: Config):
     if initialized():
         raise OSError("OVPN output directories already initialized")
 
-    os.makedirs(config.TEAM_SERVER_DIR, exist_ok=True)
-    os.makedirs(config.VULN_SERVER_DIR, exist_ok=True)
-    os.makedirs(config.JURY_SERVER_DIR, exist_ok=True)
+    ensure_file_directory_exists(VPN_JURY_CLIENT_PATH)
+    ensure_file_directory_exists(VPN_JURY_SERVER_PATH)
 
-    os.makedirs(config.TEAM_CLIENT_DIR, exist_ok=True)
-    os.makedirs(config.VULN_CLIENT_DIR, exist_ok=True)
-    os.makedirs(config.JURY_CLIENT_DIR, exist_ok=True)
+    for team_num in range(1, len(config.teams) + 1):
+        ensure_file_directory_exists(vpn_vunlbox_client_path(team_num))
+        ensure_file_directory_exists(vpn_vunlbox_server_path(team_num))
+        ensure_file_directory_exists(vpn_team_server_path(team_num))
+        for player_num in range(1, config.players_per_team + 1):
+            ensure_file_directory_exists(vpn_team_client_path(team_num, player_num))
 
 
 def generate(team_count, per_team, vpn_server):

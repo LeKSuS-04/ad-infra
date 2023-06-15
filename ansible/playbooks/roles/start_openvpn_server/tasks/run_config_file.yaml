@@ -1,0 +1,12 @@
+---
+- name: Copy config file to remote
+  ansible.builtin.copy:
+    src: "{{ vpn_config_local_path }}"
+    # Random id is generated to avoid name collision if some of configs have same filename locally
+    dest: "/ovpn_configs/{{ query('community.general.random_string', override_all=hex, length=16) }}.conf"
+  register: config
+  vars:
+    hex: "0123456789abcdef"
+
+- name: Start OpenVPN daemon
+  ansible.builtin.command: "openvpn --config {{ config.dest }} --daemon"

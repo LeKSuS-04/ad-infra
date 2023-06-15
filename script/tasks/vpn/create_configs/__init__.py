@@ -9,7 +9,7 @@ def generate_if_not_exist(config: Config, vpn_host: str):
         log("OpenVPN configs already exist; skipping generation")
         return
 
-    ovpngen.initialize()
+    ovpngen.initialize(config)
     log("Initialized directories")
     ovpngen.generate(
         team_count=len(config.teams),

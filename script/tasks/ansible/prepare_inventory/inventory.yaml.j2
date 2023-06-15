@@ -25,6 +25,10 @@ all:
             team_count: {{team_count}}
             network_open_time: {{network_open_time}}
             timezone: {{timezone}}
+            vpn_server_files:
+              {%- for vpn_server_file in vpn_server_files %}
+              - {{vpn_server_file}}
+              {%- endfor %}
           hosts:
             {{vpn_host}}:
 

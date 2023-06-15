@@ -1,10 +1,78 @@
 from pathlib import Path
 
+################# GENERAL #################
+
 CWD = Path.cwd()
 ROOT = Path("/")
 
-GENERATED_PATH = CWD / "generated"
-TERRAFORM_PATH = CWD / "terraform"
-ANSIBLE_PATH = CWD / "ansible"
+CONFIG_PATH = CWD / "config.yaml"
+TEAMS_CONFIG_PATH = CWD / "teams.yaml"
+
+
+################# ANSIBLE #################
+
+ANSIBLE_DIR = CWD / "ansible"
+ANSIBLE_CONFIG_PATH = ANSIBLE_DIR / "ansible.cfg"
+ANSIBLE_INVENTORY_PATH = ANSIBLE_DIR / "inventory.yaml"
+ANSIBLE_LIBRARY_DIR = ANSIBLE_DIR / "library"
+ANSIBLE_PLAYBOOKS_DIR = ANSIBLE_DIR / "playbooks"
+ANSIBLE_JURY_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "jury_conf.yaml"
+ANSIBLE_VPN_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vpn_conf.yaml"
+ANSIBLE_VULNBOXES_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vulnboxes_conf.yaml"
+
+
+################# TERRAFORM #################
+
+TERRAFORM_DIR = CWD / "terraform"
+TERRAFORM_CONFIG_PATH = TERRAFORM_DIR / "variables.auto.tfvars.json"
+TERRAFORM_CLOUD_INIT_CONFIG_PATH = TERRAFORM_DIR / "cloud-init.yaml"
+
+
+################# PUBLIC #################
+
+PUBLIC_GENERATED_DIR = CWD / "generated"
+
+PRIV_SSH_KEY_FILE_PATH = PUBLIC_GENERATED_DIR / "id_ecdsa"
+PUB_SSH_KEY_FILE_PATH = PUBLIC_GENERATED_DIR / "id_ecdsa.pub"
+
+FORCAD_CONFIG_PATH = PUBLIC_GENERATED_DIR / "forcad.yaml"
+
+PUBLIC_VPN_DIR = PUBLIC_GENERATED_DIR / "vpn"
+
+
+def vpn_team_client_path(team_num: int, player_num: int) -> Path:
+    return PUBLIC_VPN_DIR / f"team{team_num:03}_{player_num}.ovpn"
+
+
+################# PRIVATE #################
+
+PRIVATE_GENERATED_DIR = ROOT / "private"
+
+PRIVATE_VPN_DIR = PRIVATE_GENERATED_DIR / "vpn"
+VPN_JURY_CLIENT_PATH = PRIVATE_VPN_DIR / "client" / "jury.ovpn"
+VPN_JURY_SERVER_PATH = PRIVATE_VPN_DIR / "server" / "jury.conf"
+
+
+def vpn_vunlbox_client_path(vunlbox_num: int) -> Path:
+    return PRIVATE_VPN_DIR / "client" / f"vuln{vunlbox_num:03}.ovpn"
+
+
+def vpn_vunlbox_server_path(vulnbox_num: int) -> Path:
+    return PRIVATE_VPN_DIR / "server" / f"vuln{vulnbox_num:03}.conf"
+
+
+def vpn_team_server_path(team_num: int) -> Path:
+    return PRIVATE_VPN_DIR / "server" / f"team{team_num:03}.conf"
+
+
+################# RESOURCES #################
+
 RESOURCES_PATH = CWD / "resources"
-INTERNAL_PATH = ROOT / "internal"
+
+
+def checkers_dir(src_dirname: Path) -> Path:
+    return RESOURCES_PATH / src_dirname / "checkers"
+
+
+def services_dir(src_dirname: Path) -> Path:
+    return RESOURCES_PATH / src_dirname / "services"

@@ -5,21 +5,8 @@
     state: present
     update_cache: true
 
-- name: Copy files
-  ansible.builtin.copy:
-    src: "/internal/vpn/{{ item }}/server/"
-    dest: /ovpn_configs
-  loop:
-    - jury
-    - vuln
-    - team
-
-- name: Get list of config files
-  ansible.builtin.find:
-    path: /ovpn_configs
-    pattern: "*.conf"
-  register: openvpn_configs
-
-- name: Start OpenVPN daemon for each of config files
-  ansible.builtin.command: "openvpn --config {{ item.path }} --daemon"
+- name: Copy and run each config file
+  ansible.builtin.include_tasks: run_config_file.yaml
   loop: "{{ openvpn_configs.files }}"
+  loop_control:
+    loop_var: vpn_config_local_path
