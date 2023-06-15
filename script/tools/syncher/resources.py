@@ -11,6 +11,8 @@ class Resource(Enum):
     INFRASTRUCTURE_READY = auto()
     ANSIBLE_INVENTORY_READY = auto()
     VULNBOX_CONFIGS = auto()
+    FORCAD_CONFIG_READY = auto()
+    TEAM_TOKENS = auto()
 
     VPN_HOST = auto()
     JURY_HOST = auto()

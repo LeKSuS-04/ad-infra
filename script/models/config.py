@@ -1,4 +1,5 @@
 from datetime import datetime
+from ipaddress import IPv4Address
 from pathlib import Path
 from typing import Literal
 
@@ -16,9 +17,30 @@ class LoadedConfigTeams(BaseModel):
     add_npc: bool
 
 
-class NetworkConfig(BaseModel):
-    open_time: datetime
+class GameConfig(BaseModel):
+    round_time: int
+    start_time: datetime
     timezone: str
+    default_score: int
+    flag_lifetime: int
+    game_hardness: float
+    inflation: bool
+
+
+class ForcadTaskConfig(BaseModel):
+    name: str
+    checker: Path
+    checker_timeout: int
+    checker_type: str
+    puts: int
+    gets: int
+    places: int
+    env_path: str | None = None
+
+
+class ForcadAdminConfig(BaseModel):
+    username: str
+    password: str
 
 
 class LoadedConfig(BaseModel):
@@ -26,7 +48,9 @@ class LoadedConfig(BaseModel):
 
     yandex_cloud: YandexCloudConfig
     src_path: Path
-    network: NetworkConfig
+    admin: ForcadAdminConfig
+    game: GameConfig
+    tasks: list[ForcadTaskConfig]
     teams: LoadedConfigTeams
 
 
@@ -49,6 +73,7 @@ class LoadedTeams(BaseModel):
 
 class Team(BaseModel):
     name: str
+    game_ip: IPv4Address
 
 
 class VMConfig(BaseModel):
@@ -71,6 +96,8 @@ class Config(BaseModel):
 
     terraform_config: TerraformConfig
     src_path: Path
-    network: NetworkConfig
+    game: GameConfig
+    tasks: list[ForcadTaskConfig]
+    forcad_admin: ForcadAdminConfig
     teams: list[Team]
     players_per_team: PositiveInt

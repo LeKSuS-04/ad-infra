@@ -3,6 +3,7 @@ from tasks import (
     generate_vulnbox_configs,
     get_ssh_keys,
     load_config,
+    save_forcad_config,
     terraform,
     vpn,
 )
@@ -19,6 +20,7 @@ def deploy():
             terraform.save_terraform_config,
             terraform.deploy_infrastructure,
             generate_vulnbox_configs,
+            save_forcad_config,
             ansible.prepare_inventory,
             ansible.ping_all_hosts,
             ansible.configure_vpn,

@@ -29,7 +29,7 @@
 
 - name: Install iptables
   ansible.builtin.apt:
-    pkg: iptables=1.8.7-1ubuntu5
+    pkg: iptables-persistent
     state: present
 
 # Since all vulnboxes are placed in the same cloud network, we need this to ensure

@@ -38,13 +38,15 @@ def prepare_inventory(
         admin_ssh_key_file_path=GENERATED_PATH / admin_ssh_key_file,
         #
         team_count=len(config.teams),
-        network_open_time=config.network.open_time,
-        timezone=config.network.timezone,
+        network_open_time=config.game.start_time,
+        timezone=config.game.timezone,
         vpn_host=vpn_host,
         #
         bastion_host=bastion_host,
         #
         jury_host=jury_host,
+        checkers_path=RESOURCES_PATH / config.src_path / "checkers",
+        forcad_config_file=GENERATED_PATH / "forcad.yaml",
         jury_vpn_client=INTERNAL_PATH / "vpn" / "jury" / "client" / "config.ovpn",
         #
         services_path=RESOURCES_PATH / config.src_path / "services",

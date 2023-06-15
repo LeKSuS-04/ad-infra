@@ -1,3 +1,5 @@
+from ipaddress import IPv4Address
+from itertools import count
 from pathlib import Path
 
 import yaml
@@ -13,8 +15,9 @@ from models import (
 from tools import Resource, Syncer, log, task
 
 
-def create_team(loaded: LoadedTeamsItem) -> Team:
-    return Team(name=loaded.name)
+def create_team(loaded: LoadedTeamsItem, team_number: int) -> Team:
+    team_ip = f"10.{80 + team_number // 256}.{team_number % 256}.2"
+    return Team(name=loaded.name, game_ip=IPv4Address(team_ip))
 
 
 @task(depends_on=[])
@@ -60,8 +63,10 @@ def load_config(sync: Syncer):
     config = Config(
         terraform_config=terraform_config,
         src_path=loaded_config.src_path,
-        network=loaded_config.network,
-        teams=list(map(create_team, loaded_teams.teams)),
+        game=loaded_config.game,
+        forcad_admin=loaded_config.admin,
+        tasks=loaded_config.tasks,
+        teams=[create_team(loaded, number) for loaded, number in zip(loaded_teams.teams, count(1))],
         players_per_team=loaded_config.teams.players_per_team,
     )
 
