@@ -29,7 +29,7 @@
     - name: Connect to the game network
       role: connect_vpn_client
       vars:
-        vpn_client_file: "{{ hostvars[inventory_hostname].vars.vpn_client_file }}"
+        vpn_client_config_local_path: "{{ hostvars[inventory_hostname].vars.vpn_client_file }}"
 
     - name: Start game services
       role: start_services

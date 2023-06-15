@@ -33,10 +33,10 @@ all:
             {{vpn_host}}:
 
         jury:
+          vars:
+            checkers_path: {{checkers_path}}
+            forcad_config_file: {{forcad_config_file}}
+            vpn_client_file: {{jury_vpn_client}}
           hosts:
             {{jury_host}}:
-              vars:
-                checkers_path: {{checkers_path}}
-                forcad_config_file: {{forcad_config_file}}
-                vpn_client_file: {{jury_vpn_client}}
 

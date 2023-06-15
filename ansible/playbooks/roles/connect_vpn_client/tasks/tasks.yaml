@@ -12,7 +12,7 @@
 
 - name: Copy OpenVPN config to host
   ansible.builtin.copy:
-    src: "{{ vpn_client_file }}"
+    src: "{{ vpn_client_config_local_path }}"
     dest: /vpn/client.ovpn
 
 - name: Run OpenVPN client file
