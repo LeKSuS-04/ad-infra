@@ -5,10 +5,11 @@ from models import (
     LoadedTeam,
     LoadedTeams,
     TerraformConfig,
-    VMConfig,
 )
 from tools import Resource, Syncer, log, task
 from tools.paths import CONFIG_PATH, TEAMS_CONFIG_PATH
+
+from .resource_manager import ResourceManager
 
 
 @task(depends_on=[], creates=[Resource.CONFIG])
@@ -23,29 +24,14 @@ def load_config(sync: Syncer):
     if loaded_config.teams.add_npc:
         loaded_teams.teams.append(LoadedTeam(name="NPC"))
 
+    resource_master = ResourceManager(loaded_config.virtual_machines)
     terraform_config = TerraformConfig(
         yandex_cloud=loaded_config.yandex_cloud,
         vulnbox_count=len(loaded_teams.teams),
-        jury_vm=VMConfig(
-            cores=4,
-            ram_gb=4,
-            ssd_gb=20,
-        ),
-        vpn_vm=VMConfig(
-            cores=4,
-            ram_gb=4,
-            ssd_gb=20,
-        ),
-        vulnbox_vm=VMConfig(
-            cores=4,
-            ram_gb=4,
-            ssd_gb=20,
-        ),
-        bastion_vm=VMConfig(
-            cores=2,
-            ram_gb=2,
-            ssd_gb=10,
-        ),
+        jury_vm=resource_master.get_jury_resources(loaded_config, loaded_teams.teams),
+        vpn_vm=resource_master.get_vpn_resources(loaded_config, loaded_teams.teams),
+        vulnbox_vm=resource_master.get_vulnbox_resources(loaded_config, loaded_teams.teams),
+        bastion_vm=resource_master.get_bastion_resources(loaded_config, loaded_teams.teams),
     )
 
     config = Config(

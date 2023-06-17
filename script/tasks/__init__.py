@@ -7,6 +7,7 @@ TASK_LIST = [
     other.map_teams_to_vulnbox_configs,
     other.pack_team_archives,
     other.save_forcad_config,
+    other.plan_resources,
     #
     ansible.configure_jury,
     ansible.configure_vpn,
