@@ -2,6 +2,10 @@
 - name: Configure jury host
   hosts: jury
   roles:
+    # https://www.reddit.com/r/ansible/comments/i5ilw6/comment/g0pj6o5
+    - name: Disable unattended-upgrades service
+      role: disable_unattended_upgrades
+
     - name: Install docker engine
       role: install_docker
 

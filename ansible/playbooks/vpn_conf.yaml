@@ -2,6 +2,10 @@
 - name: Configure VPN host
   hosts: vpn
   roles:
+    # https://www.reddit.com/r/ansible/comments/i5ilw6/comment/g0pj6o5
+    - name: Disable unattended-upgrades service
+      role: disable_unattended_upgrades
+
     - name: Run OpenVPN server configs
       role: start_openvpn_server
       vars:

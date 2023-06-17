@@ -1,26 +1,17 @@
-from ipaddress import IPv4Address
-from itertools import count
-
 import yaml
-from constants.paths import CONFIG_PATH, TEAMS_CONFIG_PATH
 from models import (
     Config,
     LoadedConfig,
+    LoadedTeam,
     LoadedTeams,
-    LoadedTeamsItem,
-    Team,
     TerraformConfig,
     VMConfig,
 )
 from tools import Resource, Syncer, log, task
+from tools.paths import CONFIG_PATH, TEAMS_CONFIG_PATH
 
 
-def create_team(loaded: LoadedTeamsItem, team_number: int) -> Team:
-    team_ip = f"10.{80 + team_number // 256}.{team_number % 256}.2"
-    return Team(name=loaded.name, game_ip=IPv4Address(team_ip))
-
-
-@task(depends_on=[])
+@task(depends_on=[], creates=[Resource.CONFIG])
 def load_config(sync: Syncer):
     with open(CONFIG_PATH) as config_file, open(TEAMS_CONFIG_PATH) as teams_file:
         loaded_config = LoadedConfig.parse_obj(yaml.load(config_file, yaml.SafeLoader))
@@ -30,7 +21,7 @@ def load_config(sync: Syncer):
         log("Loaded and validated teams.yaml")
 
     if loaded_config.teams.add_npc:
-        loaded_teams.teams.append(LoadedTeamsItem(name="NPC"))
+        loaded_teams.teams.append(LoadedTeam(name="NPC"))
 
     terraform_config = TerraformConfig(
         yandex_cloud=loaded_config.yandex_cloud,
@@ -63,8 +54,10 @@ def load_config(sync: Syncer):
         game=loaded_config.game,
         forcad_admin=loaded_config.admin,
         tasks=loaded_config.tasks,
-        teams=[create_team(loaded, number) for loaded, number in zip(loaded_teams.teams, count(1))],
+        teams=loaded_teams.teams,
         players_per_team=loaded_config.teams.players_per_team,
+        archive_password=loaded_config.teams.archive_password,
+        readme_template=loaded_config.teams.readme_template,
     )
 
     sync.set_resource(Resource.CONFIG, config)

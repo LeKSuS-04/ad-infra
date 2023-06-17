@@ -1,7 +1,7 @@
 import os
 
-from constants.paths import ANSIBLE_CONFIG_PATH, ANSIBLE_INVENTORY_PATH, ANSIBLE_LIBRARY_DIR
 from tools import process
+from tools.paths import ANSIBLE_CONFIG_PATH, ANSIBLE_INVENTORY_PATH, ANSIBLE_LIBRARY_DIR
 
 
 def run_with_ansible_env(command: str, **options) -> bytes:

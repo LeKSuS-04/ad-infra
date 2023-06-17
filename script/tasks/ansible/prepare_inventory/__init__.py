@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import cast
 
-from constants.paths import (
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from models import Config, VulnboxConfig
+from tools import Resource, Syncer, task
+from tools.paths import (
     ANSIBLE_INVENTORY_PATH,
     FORCAD_CONFIG_PATH,
     PRIV_SSH_KEY_FILE_PATH,
@@ -9,9 +12,6 @@ from constants.paths import (
     checkers_dir,
     services_dir,
 )
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from models import Config, VulnboxConfig
-from tools import Resource, Syncer, task
 
 from .utils import get_all_vpn_server_paths, to_ansible_vunlbox_config
 
@@ -25,18 +25,21 @@ _JINJA_ENV = Environment(
     depends_on=[
         Resource.CONFIG,
         Resource.VULNBOX_CONFIGS,
-        Resource.BASTION_HOST,
-        Resource.JURY_HOST,
-        Resource.VPN_HOST,
+        Resource.BASTION_HOST_IP,
+        Resource.JURY_HOST_IP,
+        Resource.VPN_HOST_IP,
     ],
     depends_on_boolean=[
-        Resource.ADMIN_SSH_KEY_FILE_SAVED,
+        Resource.ADMIN_SSH_KEY_FILE_SAVED_TO_DISK,
+    ],
+    creates=[
+        Resource.ANSIBLE_INVENTORY_SAVED_TO_DISK,
     ],
 )
 def prepare_inventory(
     sync: Syncer,
     config: Config,
-    vulnbox_configs: list[VulnboxConfig],
+    vulnbox_configs: dict[str, VulnboxConfig],
     bastion_host: str,
     jury_host: str,
     vpn_host: str,
@@ -66,4 +69,4 @@ def prepare_inventory(
         inventory_template = _JINJA_ENV.get_template("inventory.yaml.j2")
         rendered = inventory_template.render(**template_params)
         f.write(cast(str, rendered))
-    sync.set_resource(Resource.ANSIBLE_INVENTORY_READY)
+    sync.set_resource(Resource.ANSIBLE_INVENTORY_SAVED_TO_DISK)

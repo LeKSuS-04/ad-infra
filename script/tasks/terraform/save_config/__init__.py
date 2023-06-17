@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import cast
 
-from constants.paths import TERRAFORM_CLOUD_INIT_CONFIG_PATH, TERRAFORM_CONFIG_PATH
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from models import Config
 from tools import Resource, Syncer, log, task
+from tools.paths import TERRAFORM_CLOUD_INIT_CONFIG_PATH, TERRAFORM_CONFIG_PATH
 
 _TEMPLATE_PATH = Path(__file__).parent
 _JINJA_ENV = Environment(
@@ -34,8 +34,11 @@ def _save_cloud_init_config(ssh_key: EllipticCurvePrivateKey):
         log(f"Saved cloud-init config into {TERRAFORM_CLOUD_INIT_CONFIG_PATH}")
 
 
-@task(depends_on=[Resource.CONFIG, Resource.ADMIN_SSH_KEY])
+@task(
+    depends_on=[Resource.CONFIG, Resource.ADMIN_SSH_KEY],
+    creates=[Resource.TERRAFORM_CONFIG_SAVED_TO_DISK],
+)
 def save_terraform_config(sync: Syncer, config: Config, ssh_key: EllipticCurvePrivateKey):
     _save_terraform_config(config)
     _save_cloud_init_config(ssh_key)
-    sync.set_resource(Resource.TERRAFORM_CONFIG_READY)
+    sync.set_resource(Resource.TERRAFORM_CONFIG_SAVED_TO_DISK)

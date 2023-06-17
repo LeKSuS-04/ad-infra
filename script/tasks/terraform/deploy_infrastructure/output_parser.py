@@ -35,22 +35,22 @@ def save_resources(sync: Syncer, terraform_output: str):
     identity = lambda x: x  # noqa: E731
     parsers = [
         _TerraformOutputParser(
-            resource=Resource.VPN_HOST,
+            resource=Resource.VPN_HOST_IP,
             terraform_variable="vpn_address",
             processer=identity,
         ),
         _TerraformOutputParser(
-            resource=Resource.JURY_HOST,
+            resource=Resource.JURY_HOST_IP,
             terraform_variable="jury_address",
             processer=identity,
         ),
         _TerraformOutputParser(
-            resource=Resource.BASTION_HOST,
+            resource=Resource.BASTION_HOST_IP,
             terraform_variable="bastion_address",
             processer=identity,
         ),
         _TerraformOutputParser(
-            resource=Resource.VULNBOX_HOSTS,
+            resource=Resource.VULNBOX_HOSTS_IPS,
             terraform_variable="vulnbox_internal_addresses",
             processer=lambda x: x.split(" "),
         ),

@@ -3,6 +3,10 @@
   hosts: vulnboxes
 
   roles:
+    # https://www.reddit.com/r/ansible/comments/i5ilw6/comment/g0pj6o5
+    - name: Disable unattended-upgrades service
+      role: disable_unattended_upgrades
+
     # This step is required because this playbook switches to `team` user
     # while configuring vulnbox. That means that SSH connection and command
     # execution are both done by unprivileged users. Installing ACL (namely,

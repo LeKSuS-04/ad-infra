@@ -4,6 +4,7 @@ from ipaddress import IPv4Address
 from pydantic import BaseModel
 
 from .config import Config, ForcadAdminConfig, ForcadTaskConfig
+from .teams import VulnboxConfig
 
 
 class ForcadTeamConfig(BaseModel):
@@ -30,7 +31,7 @@ class ForcadConfig(BaseModel):
     tasks: list[ForcadTaskConfig]
 
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config, vulnbox_configs: dict[str, VulnboxConfig]):
         game = ForcadGameConfig(
             round_time=config.game.round_time,
             start_time=config.game.start_time,
@@ -41,7 +42,10 @@ class ForcadConfig(BaseModel):
             inflation=config.game.inflation,
         )
 
-        teams = [ForcadTeamConfig(name=team.name, ip=team.game_ip) for team in config.teams]
+        teams = [
+            ForcadTeamConfig(name=team_name, ip=vulnbox_config.game_ip)
+            for team_name, vulnbox_config in vulnbox_configs.items()
+        ]
 
         return ForcadConfig(
             admin=config.forcad_admin,
@@ -49,8 +53,3 @@ class ForcadConfig(BaseModel):
             game=game,
             teams=teams,
         )
-
-
-class ForcadTeamToken(BaseModel):
-    team_name: str
-    token: str

@@ -1,5 +1,4 @@
 from datetime import datetime
-from ipaddress import IPv4Address
 from pathlib import Path
 from typing import Literal
 
@@ -15,6 +14,8 @@ class YandexCloudConfig(BaseModel):
 class LoadedConfigTeams(BaseModel):
     players_per_team: PositiveInt
     add_npc: bool
+    archive_password: str | None = None
+    readme_template: str
 
 
 class GameConfig(BaseModel):
@@ -54,26 +55,21 @@ class LoadedConfig(BaseModel):
     teams: LoadedConfigTeams
 
 
-class LoadedTeamsItem(BaseModel):
+class LoadedTeam(BaseModel):
     name: str
 
 
 class LoadedTeams(BaseModel):
     """Structure of teams.yaml."""
 
-    teams: list[LoadedTeamsItem]
+    teams: list[LoadedTeam]
 
     @validator("teams")
-    def must_be_unique(cls, teams: list[LoadedTeamsItem]):  # noqa: N805
+    def must_be_unique(cls, teams: list[LoadedTeam]):  # noqa: N805
         for team in teams:
             if list(map(lambda t: t.name == team.name, teams)).count(True) > 1:
                 raise ValueError(f'Team "{team.name}" is registered multiple times')
         return teams
-
-
-class Team(BaseModel):
-    name: str
-    game_ip: IPv4Address
 
 
 class VMConfig(BaseModel):
@@ -99,5 +95,7 @@ class Config(BaseModel):
     game: GameConfig
     tasks: list[ForcadTaskConfig]
     forcad_admin: ForcadAdminConfig
-    teams: list[Team]
+    teams: list[LoadedTeam]
     players_per_team: PositiveInt
+    archive_password: str | None
+    readme_template: str

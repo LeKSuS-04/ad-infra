@@ -3,7 +3,8 @@
 
 from pathlib import Path
 
-from constants.paths import (
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from tools.paths import (
     VPN_JURY_CLIENT_PATH,
     VPN_JURY_SERVER_PATH,
     vpn_team_client_path,
@@ -11,7 +12,6 @@ from constants.paths import (
     vpn_vunlbox_client_path,
     vpn_vunlbox_server_path,
 )
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import config, crypto_utils
 

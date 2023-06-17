@@ -10,3 +10,14 @@ class VulnboxConfig(BaseModel):
     local_vpn_config_path: Path
     username: str
     password: str
+
+
+class TeamConfig(BaseModel):
+    name: str
+    vulnbox_ip: IPv4Address
+    vulnbox_username: str
+    vulnbox_password: str
+    token: str
+
+
+TeamTokens = dict[str, str]

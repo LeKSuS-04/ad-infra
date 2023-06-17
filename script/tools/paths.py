@@ -1,4 +1,5 @@
 from pathlib import Path
+from string import ascii_letters, digits
 
 ################# GENERAL #################
 
@@ -40,8 +41,21 @@ FORCAD_CONFIG_PATH = PUBLIC_GENERATED_DIR / "forcad.yaml"
 PUBLIC_VPN_DIR = PUBLIC_GENERATED_DIR / "vpn"
 
 
-def vpn_team_client_path(team_num: int, player_num: int) -> Path:
-    return PUBLIC_VPN_DIR / f"team{team_num:03}_{player_num}.ovpn"
+def _normalize_team_name(team_name: str) -> str:
+    allowed_chars = set(ascii_letters + digits + "_-.")
+    team_name = team_name.replace(" ", "_")
+
+    for char in set(team_name):
+        if char not in allowed_chars:
+            team_name = team_name.replace(char, "")
+
+    return team_name
+
+
+def team_archive_path(team_name: str, team_num: int) -> Path:
+    normalized_team_name = _normalize_team_name(team_name)
+    zipfile_name = f"{normalized_team_name}.team{team_num:03}.zip"
+    return PUBLIC_GENERATED_DIR / "dist" / zipfile_name
 
 
 ################# PRIVATE #################
@@ -59,6 +73,10 @@ def vpn_vunlbox_client_path(vunlbox_num: int) -> Path:
 
 def vpn_vunlbox_server_path(vulnbox_num: int) -> Path:
     return PRIVATE_VPN_DIR / "server" / f"vuln{vulnbox_num:03}.conf"
+
+
+def vpn_team_client_path(team_num: int, player_num: int) -> Path:
+    return PRIVATE_VPN_DIR / "client" / f"team{team_num:03}_{player_num}.ovpn"
 
 
 def vpn_team_server_path(team_num: int) -> Path:

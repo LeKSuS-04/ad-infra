@@ -19,12 +19,17 @@ def get_status_str(status_up: bool) -> str:
 
 @task(
     depends_on=[
-        Resource.JURY_HOST,
-        Resource.VPN_HOST,
-        Resource.VULNBOX_HOSTS,
+        Resource.JURY_HOST_IP,
+        Resource.VPN_HOST_IP,
+        Resource.VULNBOX_HOSTS_IPS,
     ],
     depends_on_boolean=[
-        Resource.ANSIBLE_INVENTORY_READY,
+        Resource.ANSIBLE_INVENTORY_SAVED_TO_DISK,
+    ],
+    creates=[
+        Resource.JURY_HOST_UP,
+        Resource.VPN_HOST_UP,
+        Resource.ALL_VULNBOX_HOSTS_UP,
     ],
 )
 def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: str):
