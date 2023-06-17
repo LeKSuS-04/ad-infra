@@ -1,18 +1,12 @@
-from . import ansible, terraform, vpn
-from .clean_filesystem import clean_filesystem
-from .get_ssh_keys import get_ssh_keys
-from .load_config import load_config
-from .map_teams_to_vulnbox_configs import map_teams_to_vulnbox_configs
-from .pack_team_archives import pack_team_archives
-from .save_forcad_config import save_forcad_config
+from . import ansible, other, terraform, vpn
 
 TASK_LIST = [
-    clean_filesystem,
-    get_ssh_keys,
-    load_config,
-    map_teams_to_vulnbox_configs,
-    pack_team_archives,
-    save_forcad_config,
+    other.clean_filesystem,
+    other.get_ssh_keys,
+    other.load_config,
+    other.map_teams_to_vulnbox_configs,
+    other.pack_team_archives,
+    other.save_forcad_config,
     #
     ansible.configure_jury,
     ansible.configure_vpn,

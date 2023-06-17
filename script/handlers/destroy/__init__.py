@@ -1,7 +1,4 @@
-from tasks import (
-    clean_filesystem,
-    terraform,
-)
+from tasks import other, terraform
 from tools import TaskManager
 
 
@@ -10,7 +7,7 @@ def destroy():
     task_manager.add_tasks(
         [
             terraform.destroy_infrastructure,
-            clean_filesystem,
+            other.clean_filesystem,
         ]
     )
     task_manager.run_tasks()
