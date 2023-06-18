@@ -114,7 +114,8 @@ class TaskManager:
 
         for task in self.tasks:
             for resource in task.dependencies:
-                dfs(resource)
+                if resource_status[resource] == Status.UNKNOWN:
+                    dfs(resource)
 
     def run_tasks(self):
         self._add_dependencies()
