@@ -6,15 +6,6 @@ from tools.syncer.resources import Resource
 
 
 class Task:
-    """Single task with resource properties.
-
-    Task wrapped in this must have `Syncher` as a first argument and required resources from
-    `depends_on` as next few arguments. If resource is required to exist, but is not needed
-    as a direct argument, it must be placed into `depends_on_boolean` argument.
-
-    Task wrapped in this must set resources all from `creates` in syncher while executing.
-    """
-
     def __init__(
         self,
         function: Callable,
@@ -69,6 +60,15 @@ def task(
     depends_on_boolean: list[Resource] = [],
     creates: list[Resource] = [],
 ):
+    """Manage task creation.
+
+    Task wrapped in this must have `Syncher` as a first argument and required resources from
+    `depends_on` as next few arguments. If resource is required to exist, but is not needed
+    as a direct argument, it must be placed into `depends_on_boolean` argument.
+
+    Task wrapped in this must set resources all from `creates` in syncher while executing.
+    """
+
     def decorator(func: Callable):
         return Task(func, depends_on, depends_on_boolean, creates)
 

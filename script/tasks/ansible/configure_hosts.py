@@ -12,14 +12,8 @@ from tools.paths import (
 from .environment import run_with_ansible_env
 
 
-def run_playbook(playbook_path: Path) -> bytes:
+def _run_playbook(playbook_path: Path) -> bytes:
     return run_with_ansible_env(f"ansible-playbook '{playbook_path}'")
-
-
-@task(depends_on_boolean=[Resource.VPN_HOST_UP], creates=[Resource.VPN_HOST_CONFIGURED])
-def configure_vpn(sync: Syncer):
-    run_playbook(ANSIBLE_VPN_PLAYBOOK_PATH)
-    sync.set_resource(Resource.VPN_HOST_CONFIGURED)
 
 
 @task(
@@ -27,7 +21,7 @@ def configure_vpn(sync: Syncer):
     creates=[Resource.JURY_HOST_CONFIGURED, Resource.TEAM_TOKENS],
 )
 def configure_jury(sync: Syncer):
-    output = run_playbook(ANSIBLE_JURY_PLAYBOOK_PATH).decode()
+    output = _run_playbook(ANSIBLE_JURY_PLAYBOOK_PATH).decode()
 
     team_tokens_match = re.search(r'"team_tokens\.stdout": "(?P<tokens>.*)"', output)
     if team_tokens_match is None:
@@ -45,9 +39,18 @@ def configure_jury(sync: Syncer):
 
 
 @task(
+    depends_on_boolean=[Resource.VPN_HOST_UP],
+    creates=[Resource.VPN_HOST_CONFIGURED],
+)
+def configure_vpn(sync: Syncer):
+    _run_playbook(ANSIBLE_VPN_PLAYBOOK_PATH)
+    sync.set_resource(Resource.VPN_HOST_CONFIGURED)
+
+
+@task(
     depends_on_boolean=[Resource.ALL_VULNBOX_HOSTS_UP],
     creates=[Resource.ALL_VULNBOX_HOSTS_CONFIGURED],
 )
 def configure_vulnboxes(sync: Syncer):
-    run_playbook(ANSIBLE_VULNBOXES_PLAYBOOK_PATH)
+    _run_playbook(ANSIBLE_VULNBOXES_PLAYBOOK_PATH)
     sync.set_resource(Resource.ALL_VULNBOX_HOSTS_CONFIGURED)

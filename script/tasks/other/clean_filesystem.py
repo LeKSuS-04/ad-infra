@@ -12,21 +12,21 @@ from tools.paths import (
 )
 
 
-def clean_directory(dir_path: Path):
+def _clean_directory(dir_path: Path):
     try:
         with os.scandir(dir_path) as it:
             for entity in it:
                 if entity.is_dir():
                     shutil.rmtree(entity)
                 else:
-                    if entity.name != ".keep":
+                    if entity.name not in (".keep", ".gitkeep"):
                         os.remove(entity)
         log(f'Cleaned "{dir_path.name}"')
     except FileNotFoundError:
         log(f"Didn't clean \"{dir_path.name}\" because it doesn't exist")
 
 
-def verbose_remove(file_path: Path):
+def _verbose_remove(file_path: Path):
     try:
         os.remove(file_path)
         log(f'Removed "{file_path.name}"')
@@ -36,12 +36,12 @@ def verbose_remove(file_path: Path):
 
 @task(depends_on_boolean=[Resource.TERRAFORM_DESTROYED], creates=[Resource.FILESYSTEM_CLEANED])
 def clean_filesystem(sync: Syncer):
-    clean_directory(PUBLIC_GENERATED_DIR)
-    clean_directory(PRIVATE_GENERATED_DIR)
+    _clean_directory(PUBLIC_GENERATED_DIR)
+    _clean_directory(PRIVATE_GENERATED_DIR)
 
-    verbose_remove(ANSIBLE_INVENTORY_PATH)
+    _verbose_remove(ANSIBLE_INVENTORY_PATH)
 
-    verbose_remove(TERRAFORM_CONFIG_PATH)
-    verbose_remove(TERRAFORM_CLOUD_INIT_CONFIG_PATH)
+    _verbose_remove(TERRAFORM_CONFIG_PATH)
+    _verbose_remove(TERRAFORM_CLOUD_INIT_CONFIG_PATH)
 
     sync.set_resource(Resource.FILESYSTEM_CLEANED)

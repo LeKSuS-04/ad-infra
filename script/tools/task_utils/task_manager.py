@@ -48,12 +48,12 @@ def _create_resource_to_task_mapping() -> dict[Resource, Task]:
 
 class TaskManager:
     def __init__(self):
-        self.tasks: set[Task] = set()
+        self._tasks: set[Task] = set()
         self._resources_to_tasks: dict[Resource, Task] = _create_resource_to_task_mapping()
 
     def add_tasks(self, new_tasks: list[Task]):
         for task in new_tasks:
-            self.tasks.add(task)
+            self._tasks.add(task)
 
     def _add_dependencies(self):
         class Status(Enum):
@@ -62,7 +62,7 @@ class TaskManager:
 
         resource_status: defaultdict[Resource, Status] = defaultdict(lambda: Status.UNKNOWN)
         required_resources = Queue()
-        for producer in self.tasks:
+        for producer in self._tasks:
             for resource in producer.dependencies:
                 required_resources.put(resource)
 
@@ -72,7 +72,7 @@ class TaskManager:
                 continue
 
             producer = self._resources_to_tasks[resource]
-            self.tasks.add(producer)
+            self._tasks.add(producer)
             resource_status[resource] = Status.HANDLED
 
             for dependency in producer.dependencies:
@@ -112,7 +112,7 @@ class TaskManager:
 
             resource_status[source] = Status.EXPLORED
 
-        for task in self.tasks:
+        for task in self._tasks:
             for resource in task.dependencies:
                 if resource_status[resource] == Status.UNKNOWN:
                     dfs(resource)
@@ -122,7 +122,7 @@ class TaskManager:
         self._ensure_no_cycles()
 
         threads = []
-        for task in self.tasks:
+        for task in self._tasks:
             thread = threading.Thread(target=task, name=task.name)
             thread.start()
             threads.append(thread)

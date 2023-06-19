@@ -22,7 +22,7 @@ def initialized():
     return VPN_JURY_CLIENT_PATH.exists()
 
 
-def ensure_file_directory_exists(file_path: Path):
+def _ensure_file_directory_exists(file_path: Path):
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
 
@@ -30,15 +30,15 @@ def initialize(config: Config):
     if initialized():
         raise OSError("OVPN output directories already initialized")
 
-    ensure_file_directory_exists(VPN_JURY_CLIENT_PATH)
-    ensure_file_directory_exists(VPN_JURY_SERVER_PATH)
+    _ensure_file_directory_exists(VPN_JURY_CLIENT_PATH)
+    _ensure_file_directory_exists(VPN_JURY_SERVER_PATH)
 
     for team_num in range(1, len(config.teams) + 1):
-        ensure_file_directory_exists(vpn_vunlbox_client_path(team_num))
-        ensure_file_directory_exists(vpn_vunlbox_server_path(team_num))
-        ensure_file_directory_exists(vpn_team_server_path(team_num))
+        _ensure_file_directory_exists(vpn_vunlbox_client_path(team_num))
+        _ensure_file_directory_exists(vpn_vunlbox_server_path(team_num))
+        _ensure_file_directory_exists(vpn_team_server_path(team_num))
         for player_num in range(1, config.players_per_team + 1):
-            ensure_file_directory_exists(vpn_team_client_path(team_num, player_num))
+            _ensure_file_directory_exists(vpn_team_client_path(team_num, player_num))
 
 
 def generate(team_count, per_team, vpn_server):

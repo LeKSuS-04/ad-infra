@@ -8,12 +8,12 @@ from .environment import run_with_ansible_env
 _ATTEMPT_INTERVAL_SECONDS = 5
 
 
-def get_active_hosts_from_output(ansible_output: str) -> set[str]:
+def _get_active_hosts_from_output(ansible_output: str) -> set[str]:
     hosts = re.findall(r"([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}) \| SUCCESS", ansible_output)
     return set(hosts)
 
 
-def get_status_str(status_up: bool) -> str:
+def _get_status_str(status_up: bool) -> str:
     return "up" if status_up else "down"
 
 
@@ -40,7 +40,7 @@ def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: s
     while True:
         log("Pinging hosts")
         output = run_with_ansible_env("ansible all -m ping")
-        active_hosts = get_active_hosts_from_output(output.decode())
+        active_hosts = _get_active_hosts_from_output(output.decode())
 
         if not jury_up:
             jury_up |= jury_host in active_hosts
@@ -63,8 +63,8 @@ def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: s
 
         log(
             f"Host statuses summary: "
-            f"jury {get_status_str(jury_up)}, "
-            f"vpn {get_status_str(vpn_up)}, "
+            f"jury {_get_status_str(jury_up)}, "
+            f"vpn {_get_status_str(vpn_up)}, "
             f"vulnboxes {vulnbox_active_count} up out of {len(vulnbox_hosts)}"
         )
 

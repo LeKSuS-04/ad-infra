@@ -12,23 +12,23 @@ class _TerraformOutputParser:
         terraform_variable: str,
         processer: Callable[[str], Any],
     ):
-        self.resource = resource
-        self.terraform_variable = terraform_variable
-        self.processer = processer
+        self._resource = resource
+        self._terraform_variable = terraform_variable
+        self._processer = processer
 
     def get_terraform_output_variable(self, terraform_output: str) -> str:
         variable_match = re.search(
-            self.terraform_variable + r' = "(?P<value>.*)"', terraform_output
+            self._terraform_variable + r' = "(?P<value>.*)"', terraform_output
         )
         if variable_match is None:
             raise ValueError(
-                f'Terraform output does not contain value for variable "{self.terraform_variable}"'
+                f'Terraform output does not contain value for variable "{self._terraform_variable}"'
             )
         return variable_match.group("value")
 
-    def process(self, sync: Syncer, terraform_output: str):
+    def save_resource(self, sync: Syncer, terraform_output: str):
         value = self.get_terraform_output_variable(terraform_output)
-        sync.set_resource(self.resource, self.processer(value))
+        sync.set_resource(self._resource, self._processer(value))
 
 
 def save_resources(sync: Syncer, terraform_output: str):
@@ -56,4 +56,4 @@ def save_resources(sync: Syncer, terraform_output: str):
         ),
     ]
     for parser in parsers:
-        parser.process(sync, terraform_output)
+        parser.save_resource(sync, terraform_output)

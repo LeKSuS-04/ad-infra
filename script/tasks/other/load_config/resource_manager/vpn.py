@@ -18,7 +18,7 @@ class VPNResourceManager(VMResourceManager):
             case ResourceEstimationBehaviour.BIG:
                 cores = len(teams) / 10
 
-        return VMResourceManager.ceil_to_multiple_of_two(cores)
+        return VMResourceManager._ceil_to_multiple_of_two(cores)
 
     @staticmethod
     def _guess_ram(**kwargs) -> int:

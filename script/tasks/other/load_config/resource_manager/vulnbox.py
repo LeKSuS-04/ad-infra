@@ -20,7 +20,7 @@ class VulnboxResourceManager(VMResourceManager):
             case ResourceEstimationBehaviour.BIG:
                 cores = 4 + len(config.tasks)
 
-        return VMResourceManager.ceil_to_multiple_of_two(cores)
+        return VMResourceManager._ceil_to_multiple_of_two(cores)
 
     @staticmethod
     def _guess_ram(**kwargs) -> int:

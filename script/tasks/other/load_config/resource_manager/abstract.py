@@ -39,7 +39,7 @@ class VMResourceManager(metaclass=ABCMeta):
             self._ram_config = resources
             self._ssd_config = resources
 
-    def value_or_guess(
+    def _value_or_guess(
         self,
         value: int | ResourceEstimationBehaviour,
         guesser: GuesserFunction,
@@ -55,17 +55,17 @@ class VMResourceManager(metaclass=ABCMeta):
         )
 
     @staticmethod
-    def ceil_to_multiple_of_two(value: int | float) -> int:
+    def _ceil_to_multiple_of_two(value: int | float) -> int:
         return ceil(value / 2) * 2
 
     def _cores(self, **config_kwargs) -> int:
-        return self.value_or_guess(self._cores_config, self._guess_cores, **config_kwargs)
+        return self._value_or_guess(self._cores_config, self._guess_cores, **config_kwargs)
 
     def _ram_gb(self, **config_kwargs) -> int:
-        return self.value_or_guess(self._ram_config, self._guess_ram, **config_kwargs)
+        return self._value_or_guess(self._ram_config, self._guess_ram, **config_kwargs)
 
     def _ssd_gb(self, **config_kwargs) -> int:
-        return self.value_or_guess(self._ssd_config, self._guess_ssd, **config_kwargs)
+        return self._value_or_guess(self._ssd_config, self._guess_ssd, **config_kwargs)
 
     @abstractstaticmethod
     def _guess_cores(
