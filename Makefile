@@ -34,6 +34,10 @@ shell:
 docker-build:
 	docker build --tag ad-infra .
 
+.PHONY: docker-pull
+docker-pull:
+	docker pull ad-infra:latest
+
 .PHONY: docker-clean
 docker-clean:
 	docker rmi ad-infra
