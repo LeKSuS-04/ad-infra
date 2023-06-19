@@ -17,6 +17,10 @@ AD_INFRA=$(DOCKER_RUN) ad-infra
 .PHONY: deploy
 deploy:
 	$(AD_INFRA) deploy
+	
+.PHONY: plan
+plan:
+	$(AD_INFRA) plan
 
 .PHONY: destroy
 destroy:
