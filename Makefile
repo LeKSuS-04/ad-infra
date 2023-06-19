@@ -9,6 +9,7 @@ DOCKER_RUN=docker run \
 	--volume "$(CWD)/resources/:/app/resources/" \
 	--volume "ad-infra-terraform:/app/terraform" \
 	--volume "ad-infra-ansible:/app/ansible" \
+	--volume "ad-infra-internal:/private" \
 	--interactive \
 	--tty \
 	--rm
