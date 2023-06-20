@@ -1,56 +1,30 @@
-# Deploy-AD
+# AD-INFRA
 
-Terraform script to deploy your Attack-Defense CTF to the cloud
+Script for easy deployment of Attack-Defense CTFs
 
-## Installation
+## Usage
 
-Just clone the repo
+1. Create `config.yaml` and `teams.yaml` configuration files and fill them with data. Examples with description of all parameters can be found [here for config.yaml](/config.example.yaml) and [here for example.yaml](/teams.example.yaml);
+2. Run `make docker-build` or `make docker-pull` to prepare Docker image;
+3. Use container to manage your infrastructure;
+4. Run `make docker-clean` to clean your system from used volumes and images.
 
-```bash
-git clone <...>
-```
+> Note: generated content will be inside `./generated` directory. Since container runs everything as a root user, you will have to execute `sudo chown -R $(whoami) .` to be get permission to access those files. 
 
-## Configuration
+## Make recipes
 
-Example configuration can be found in `terraform.tfvars.example`. Copy and
-modify it before the deployment:
+* `plan` - calculates amount of resources required for deployment of infrastructure with specified configuration
+* `deploy` - deploys and configures infrastructure
+* `destroy` - destroys infrastructure
 
-```bash
-cp terraform.tfvars.example terraform.tfvars
-```
+* `docker-build` - builds image from the sources
+* `docker-pull` - pulls pre-built image from the Docker Hub
+* `docker-clean` - removes the image and all the volumes for system, as if the container have never existed
 
-### Configuration file reference
+## More information
 
-- `yandex_cloud`: Cloud configuration
-  - `folder_id`: [Folder](https://cloud.yandex.com/en-ru/docs/resource-manager/operations/#folder) that will contain infrastructure
-  - `zone`: [Availability zone](https://cloud.yandex.com/en-ru/docs/overview/concepts/geo-scope), in which infrastructure will be placed
-  - `serice_account_key_file`: [Key file for service account](https://cloud.yandex.com/en-ru/docs/cli/operations/authentication/service-account#auth-as-sa)
-  - `static_key`: [Static key](https://cloud.yandex.com/en-ru/docs/iam/concepts/authorization/access-key) to access bucket storages
-    - `access_key`: [Access part](https://cloud.yandex.com/en-ru/docs/iam/concepts/authorization/access-key) of static key
-    - `secret_key`: [Secret part](https://cloud.yandex.com/en-ru/docs/iam/concepts/authorization/access-key) of static key
-- `admin_accounts`: List of administrator accounts, which will be placed at every
-  cloud instance and granted sudo priveleges.
-  - `username`: Username of administrator account
-  - `public_ssh_key`: Public ssh key of account to provide ssh access to the instance
-- `admin_private_key`: Private key of one of the administrators. Administrator
-  account with this key is used to set up all instances via ssh, so this must exist.
-  - `username`: Username of administrator account
-  - `private_ssh_key_location`: Path to the private ssh key on the local machine
-- `network_config`: Configuration of VPN network. Time must be in format `YYYY-MM-DD hh:mm:ss`
-  - `open_time`: Time to open network and launch checkers
-  - `close_time`: Time to close network
-  - `timezone`: Specify timezone
-- `forcad_config`: Configuration of ForcAD. Parameters that must be specified in could be found in [variables.tf](./variables.tf)
-- `teams_config`: Configuration of teams
-  - `add_npc`: Whether to add NPC player or not
-  - `players_per_team`: How many VPN configs per team should be generated
-  - `teams`: list of strings with team names
-- `local_dirs`: Directories, used by local scripts. Will be created, if not exist
-  - `result_dir`: VPN configs for teams will be saved here
-  - `temp_dir`: Directory for temporary file placement, will be cleaned after execution
-  - `src_dir`: Directory which contains services and checkers. Must be structured exactly as described [here](https://github.com/pomo-mondreganto/ad-boilerplate/tree/master)
+You can read more about structure and ideas of this script on the [wiki page](https://github.com/LeKSuS-04/ad-infra/wiki).
 
-### Example
+---
 
-[LeKSuS-04/ad-training-03-11-2022](https://github.com/LeKSuS-04/ad-training-03-11-2022/tree/master)
-is used as an example of service repository. All example configurations are compatible with it.
+Made by [LeKSuS](https://github.com/LeKSuS-04), distributed under [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html)

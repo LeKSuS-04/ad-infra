@@ -1,0 +1,5 @@
+.terraform
+cloud-init.yaml
+terraform.tfstate
+terraform.tfstate.backup
+variables.auto.tfvars.json

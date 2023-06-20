@@ -1,0 +1,32 @@
+---
+- name: Ensure directory for services exists
+  become: true
+  become_user: root
+  ansible.builtin.file:
+    path: "{{ services_remote_path }}"
+    state: directory
+    owner: "{{ owner }}"
+    group: "{{ owner_group }}"
+
+- name: Run services as specified user
+  become: true
+  become_user: "{{ owner }}"
+  block:
+    - name: Copy services to vulnbox
+      ansible.builtin.copy:
+        # '/' is appended to the path to ensure that only items inside services directories
+        # (directories with services themselves) will be copied
+        src: "{{ services_local_path + '/' }}"
+        dest: "{{ services_remote_path }}"
+
+    - name: Get names of service directories
+      ansible.builtin.find:
+        path: "{{ services_remote_path }}"
+        file_type: directory
+      register: services
+
+    - name: Run services with docker compose
+      community.docker.docker_compose:
+        project_src: "{{ item.path }}"
+        state: present
+      loop: "{{ services.files }}"

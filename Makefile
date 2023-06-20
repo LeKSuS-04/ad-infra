@@ -1,0 +1,45 @@
+CWD=$(shell pwd)
+USER=$(shell id -u)
+GROUP=$(shell id -g)
+
+DOCKER_RUN=docker run \
+	--volume "$(CWD)/config.yaml:/app/config.yaml:ro" \
+	--volume "$(CWD)/teams.yaml:/app/teams.yaml:ro" \
+	--volume "$(CWD)/generated/:/app/generated/" \
+	--volume "$(CWD)/resources/:/app/resources/" \
+	--volume "ad-infra-terraform:/app/terraform" \
+	--volume "ad-infra-ansible:/app/ansible" \
+	--volume "ad-infra-internal:/private" \
+	--interactive \
+	--tty \
+	--rm
+AD_INFRA=$(DOCKER_RUN) ad-infra
+
+.PHONY: deploy
+deploy:
+	$(AD_INFRA) deploy
+	
+.PHONY: plan
+plan:
+	$(AD_INFRA) plan
+
+.PHONY: destroy
+destroy:
+	$(AD_INFRA) destroy
+
+.PHONY: shell
+shell:
+	$(DOCKER_RUN) --entrypoint="/bin/bash" ad-infra
+
+.PHONY: docker-build
+docker-build:
+	docker build --tag ad-infra .
+
+.PHONY: docker-pull
+docker-pull:
+	docker pull ad-infra:latest
+
+.PHONY: docker-clean
+docker-clean:
+	docker rmi ad-infra
+	docker volume rm ad-infra-ansible ad-infra-terraform ad-infra-internal

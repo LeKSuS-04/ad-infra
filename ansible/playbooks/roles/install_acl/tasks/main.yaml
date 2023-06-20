@@ -1,0 +1,7 @@
+---
+- name: Ensure acl is installed
+  become: true
+  ansible.builtin.apt:
+    pkg: acl
+    state: present
+    update_cache: true

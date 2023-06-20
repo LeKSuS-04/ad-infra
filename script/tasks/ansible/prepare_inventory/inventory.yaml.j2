@@ -1,0 +1,42 @@
+all:
+  children:
+    virtualmachines:
+      vars:
+        ansible_user: {{admin_username}}
+        ansible_ssh_private_key_file: {{admin_ssh_key_file_path}}
+
+      children:
+        vulnboxes:
+          vars:
+            ansible_ssh_common_args: -o ProxyCommand="ssh -i {{admin_ssh_key_file_path}} -q -W %h:%p -o StrictHostKeyChecking=no {{admin_username}}@{{bastion_host}}"
+            services_path: {{services_path}}
+
+          hosts:
+            {%- for host, data in vulnbox_hosts.items() %}
+            {{host}}:
+              vars:
+                vpn_client_file: {{data.vpn_file}}
+                username: {{data.user}}
+                password: {{data.password}}
+            {%- endfor %}
+
+        vpn:
+          vars:
+            team_count: {{team_count}}
+            network_open_time: {{network_open_time}}
+            timezone: {{timezone}}
+            vpn_server_files:
+              {%- for vpn_server_file in vpn_server_files %}
+              - {{vpn_server_file}}
+              {%- endfor %}
+          hosts:
+            {{vpn_host}}:
+
+        jury:
+          vars:
+            checkers_path: {{checkers_path}}
+            forcad_config_file: {{forcad_config_file}}
+            vpn_client_file: {{jury_vpn_client}}
+          hosts:
+            {{jury_host}}:
+

@@ -1,0 +1,21 @@
+---
+- name: Configure jury host
+  hosts: jury
+  roles:
+    # https://www.reddit.com/r/ansible/comments/i5ilw6/comment/g0pj6o5
+    - name: Disable unattended-upgrades service
+      role: disable_unattended_upgrades
+
+    - name: Install docker engine
+      role: install_docker
+
+    - name: Connect to game network
+      role: connect_vpn_client
+      vars:
+        vpn_client_config_local_path: "{{ vpn_client_file }}"
+
+    - name: Start ForcAD
+      role: start_forcad
+      vars:
+        forcad_config_local_path: "{{ forcad_config_file }}"
+        checkers_local_path: "{{ checkers_path }}"

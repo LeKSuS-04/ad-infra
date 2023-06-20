@@ -1,0 +1,91 @@
+---
+- name: Ensure no conflicting packages exist on the system
+  ansible.builtin.apt:
+    pkg:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+    update_cache: true
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    pkg:
+      # For docker installation
+      - ca-certificates
+      - curl
+      - gnupg
+
+      # For docker SDKs for python to allow ansible to work with docker
+      - python3
+      - python3-pip
+    state: present
+
+- name: Install python packages for community.docker module
+  ansible.builtin.pip:
+    name:
+      - docker==6.1.3
+      - pyyaml==5.4.1
+
+      # It's a shame that Ansible doesn't support `docker compose``
+      - docker-compose==1.29.2
+    state: present
+
+- name: Download docker GPG key
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    dest: /etc/apt/keyrings/docker.asc
+    mode: 0644
+    force: true
+  register: gpg_download
+
+- name: Get DEB architecture
+  ansible.builtin.shell: dpkg --print-architecture
+  register: deb_architecture
+
+- name: Add docker repository into sources list
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [arch={{ deb_architecture.stdout }} signed-by={{ gpg_download.dest }}]
+      https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+    filename: docker.list
+    update_cache: true
+
+- name: Install docker
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add ansible user to docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    append: true
+    groups: docker
+    state: present
+  loop: "{{ docker_users }}"
+
+- name: Reload SSH connection to apply group changes
+  ansible.builtin.meta: reset_connection
+
+- name: Make sure docker service is running and enable autostart on boot
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - docker.service
+    - containerd.service

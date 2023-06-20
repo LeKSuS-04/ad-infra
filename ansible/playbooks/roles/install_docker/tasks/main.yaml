@@ -1,0 +1,4 @@
+---
+- name: Run all tasks as root
+  ansible.builtin.import_tasks: tasks.yaml
+  become: true
