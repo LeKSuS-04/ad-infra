@@ -34,4 +34,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: $DOCKERHUB_REPOSITORY:latest
+          tags: ${{ env.DOCKERHUB_REPOSITORY }}:latest
