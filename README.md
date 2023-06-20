@@ -9,6 +9,8 @@ Script for easy deployment of Attack-Defense CTFs
 3. Use container to manage your infrastructure;
 4. Run `make docker-clean` to clean your system from used volumes and images.
 
+> Note: generated content will be inside `./generated` directory. Since container runs everything as a root user, you will have to execute `sudo chown -R $(whoami) .` to be get permission to access those files. 
+
 ## Make recipes
 
 * `plan` - calculates amount of resources required for deployment of infrastructure with specified configuration

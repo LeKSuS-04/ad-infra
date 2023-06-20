@@ -117,13 +117,13 @@ teams:
 
     ### VPN network structure
     * Jury system (ForcAD): `10.10.10.10`
-    * Vulnboxes: `10.{{ len(config.teams) // 256 }}.{{ len(config.teams) % 256 }}.2`
+    * Vulnboxes: `10.{{ (config.teams | length) // 256 }}.{{ (config.teams | length) % 256 }}.2`
     * Network opens at `{{ config.game.start_time }}` using `{{ config.game.timezone }}` timezone!
 
     ### Jury config
     * Round time: `{{ forcad.game.round_time }} seconds`
     * Flag lifetime: `{{ forcad.game.flag_lifetime }} rounds`
-    * Public scoreboard is available at `{{ public_jury_ip }}``
+    * Public scoreboard is available at `http://{{ public_jury_ip }}/`
     * Flag submission protocol is `ructf_http`
 
     Example of submitting flags via http using curl:

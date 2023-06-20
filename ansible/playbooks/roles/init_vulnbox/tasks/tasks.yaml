@@ -69,3 +69,17 @@
     create_home: true
     state: present
   register: user
+
+- name: Edit sshd config to allow ssh authentication with password
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PasswordAuthentication no$"
+    line: "PasswordAuthentication yes"
+    backrefs: yes
+  register: sshd_config
+
+- name: Reload sshd service
+  ansible.builtin.systemd:
+    name: ssh.service
+    state: restarted
+  when: sshd_config.changed
