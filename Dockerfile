@@ -1,10 +1,6 @@
 FROM python:3.10.11-bullseye
 
 WORKDIR /app
-COPY --chown=1000:1000 --chmod=755 script/ ./script/
-COPY --chown=1000:1000 --chmod=777 ansible/ ./ansible/
-COPY --chown=1000:1000 --chmod=777 terraform/ ./terraform/
-RUN mkdir -p /internal
 
 RUN apt update -y && apt install unzip openvpn -y
 
@@ -13,10 +9,6 @@ RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/terraform/1.4.6/terr
 RUN unzip -d /tmp -o /tmp/terraform_1.4.6_linux_amd64.zip
 RUN mv /tmp/terraform /bin/terraform
 
-# Initialize terraform
-ENV TF_CLI_CONFIG_FILE=/app/terraform/mirror.tfrc
-RUN terraform -chdir=./terraform init
-
 # Set up python
 ENV PYTHONUNBUFFERED=1
 
@@ -24,5 +16,17 @@ ENV PYTHONUNBUFFERED=1
 COPY ./requirements.txt .
 RUN pip install --no-cache --upgrade -r requirements.txt
 
-WORKDIR /app
+# Copy source files
+COPY --chmod=755 script/ ./script/
+COPY --chmod=777 ansible/ ./ansible/
+COPY --chmod=777 terraform/ ./terraform/
+
+# Manage permissions on directories used to write files
+RUN mkdir /private
+RUN chmod 777 /private ./terraform ./ansible
+
+# Initialize terraform
+ENV TF_CLI_CONFIG_FILE=/app/terraform/mirror.tfrc
+RUN terraform -chdir=./terraform init
+
 ENTRYPOINT [ "./script/main.py" ]
