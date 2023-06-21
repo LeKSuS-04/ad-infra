@@ -1,5 +1,6 @@
 import random
 import threading
+import datetime
 from queue import Queue
 
 from colorama import Fore, Style
@@ -71,8 +72,9 @@ def _get_short_thread_name(length: int = 9) -> str:
 def log(data, **print_kwargs):
     color = _ColorManager().get_thread_color()
     name = _get_short_thread_name()
-    tag = f"{Style.RESET_ALL}{color}[{name}]{Style.RESET_ALL}"
+    current_time = datetime.datetime.now().strftime("%H:%M:%S")
+    tag = f"{color}[{name}]{Style.RESET_ALL}"
 
     with _PRINT_LOCK:
         for line in str(data).strip("\n").split("\n"):
-            print(f"{tag} {line}", flush=True, **print_kwargs)
+            print(f"{Style.RESET_ALL} {current_time} {tag} {line}", flush=True, **print_kwargs)
