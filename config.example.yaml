@@ -1,43 +1,20 @@
+# More thorough explanation can be found here: https://github.com/LeKSuS-04/ad-infra/wiki/Configuration
+
 yandex_cloud:
   # Folder to create resources in.
-  # More information: https://cloud.yandex.com/en/docs/resource-manager/operations/folder/get-id.
   folder_id: your_folder_id_here
 
   # Zone to create resources in.
-  # More information: https://cloud.yandex.com/en/docs/overview/concepts/geo-scope.
   zone: ru-central1-a
 
   # Can be generated via `yc iam create-token`.
-  # More information: https://cloud.yandex.com/en/docs/iam/operations/iam-token/create.
   iam_token: your_iam_token_here
 
 # Directory in `./resources` that contains distributable checkers and services.
 src_dirname: ad-training-03-12-2022
 
-# Resources for virtual machines. Each field can accept either integer value, representing
-# desired dedicated resources for machine, or on of literals "tiny", "auto" or "generous"
-# Also each of VM fields themselves (and even the root, `vurtual_machines`) can accept literals,
-# which will apply that value for all children. Literal values make this script to auto-estimate
-# required amount of resourses for each VM based on different facts it can find.
-# This configuration is here just for the sake of an example, it is equivalent to this one line:
-# virtual_machines: auto
-virtual_machines:
-  jury:
-    cores: auto
-    ram_gb: auto
-    ssd_gb: auto
-  vpn:
-    cores: auto
-    ram_gb: auto
-    ssd_gb: auto
-  vulnbox:
-    cores: auto
-    ram_gb: auto
-    ssd_gb: auto
-  bastion:
-    cores: auto
-    ram_gb: auto
-    ssd_gb: auto
+# Resources for virtual machines.
+virtual_machines: auto
 
 # Credentials from various ForcAD web interfaces.
 admin:
@@ -48,11 +25,8 @@ game:
   # Round duration in seconds.
   round_time: 30
 
-  # Timestamp to launch checkers and open network (allows players to attack
-  # each other, submit flags, etc.).
-  # It is recommended to set this at least 15 minutes in the future from deploying
-  # infrastructure, since the jury usually is deployed and configured faster than
-  # vulnboxes, resulting in lower initial SLA for participants.
+  # Timestamps to start and stop the game. It is recommended to schedule this at least
+  # 15 minutes after deploying infrastructure.
   start_time: 2023-12-31 12:00:00
   timezone: Europe/Moscow
 
@@ -69,27 +43,7 @@ game:
   # States if whether a team earns points by attacking zero-rating victium.
   inflation: true
 
-# Description of each task for checksystem. Properties are described below:
-# name:
-#   Name of the service, shown on scoreboard.
-# checker:
-#   Path to checker, relative to `<src_path> / checkers`.
-# checker_timeout:
-#   Timeout in seconds for each checker action. As checker performs at least 3
-#   actions each round (check, put, get), it is recommended to set `game.round_time`
-#   to the value at least 3 times greater than max `checker_timeout`.
-# checker_type:
-#   Underscore-separated tags that describe checker. More info here, in description
-#   of `checker_type` option:
-#   https://github.com/pomo-mondreganto/ForcAD/tree/master#configuration
-# puts:
-#   Amount of flags to put each round.
-# gets:
-#   Amount of flags to check each round.
-# places:
-#   Amount of possible places for flag in service.
-# env_path: [optional]
-#   Path or combination of paths to be prepended to `PATH` env variable.
+# Description of each task for checksystem.
 tasks:
   - name: test_basic_service
     checker: test_service/checker.py
@@ -118,15 +72,7 @@ teams:
   # to create unprotected archives.
   archive_password: null
 
-  # Jinja template for README.md file for each team. Available variables:
-  # team:
-  #   model `TeamConfig` from ./script/models/teams.py.
-  # config:
-  #   model `Config` from ./script/models/config.py.
-  # forcad:
-  #   model `ForcadConfig` from ./script/models/forcad.py.
-  # public_jury_ip:
-  #   string, public address of scoreboard.
+  # Jinja template for README.md file for each team.
   readme_template: |
     # Welcome to yet another Attack-Defense CTF!
 
