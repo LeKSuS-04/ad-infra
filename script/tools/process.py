@@ -19,4 +19,7 @@ def process(cmd: str, **options: Any) -> bytes:
         stdout += line
         log(line.decode())
 
+    if proc.returncode != 0:
+        raise ValueError(f'Process "{cmd}" exited with non-zero code {proc.returncode}')
+
     return stdout
