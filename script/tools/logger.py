@@ -1,26 +1,45 @@
 import random
 import threading
+from queue import Queue
 
 from colorama import Fore, Style
 
-_COLORS = [
-    Fore.BLACK,
-    Fore.RED,
-    Fore.GREEN,
-    Fore.YELLOW,
-    Fore.BLUE,
-    Fore.MAGENTA,
-    Fore.CYAN,
-]
-
+from tools.singleton import Singleton
 
 _PRINT_LOCK = threading.Lock()
 
 
-def _hash_to_five_digits(n: int) -> int:
-    while n > 100_000:
-        n = (n // 100_000) ^ (n % 100_000)
-    return n
+class _ColorManager(metaclass=Singleton):
+    def __init__(self):
+        _colors = [
+            Fore.BLACK,
+            Fore.RED,
+            Fore.GREEN,
+            Fore.YELLOW,
+            Fore.BLUE,
+            Fore.MAGENTA,
+            Fore.CYAN,
+        ]
+        random.shuffle(_colors)
+
+        self._colors = Queue()
+        for color in _colors:
+            self._colors.put(color)
+
+        self._thread_to_color: dict[str, str] = dict()
+        self._lock = threading.Lock()
+
+    def get_thread_color(self) -> str:
+        thread_name = threading.current_thread().name
+
+        with self._lock:
+            if thread_name in self._thread_to_color:
+                return self._thread_to_color[thread_name]
+
+            next_color = self._colors.get()
+            self._thread_to_color[thread_name] = next_color
+            self._colors.put(next_color)
+            return next_color
 
 
 def _get_short_thread_name(length: int = 9) -> str:
@@ -50,10 +69,7 @@ def _get_short_thread_name(length: int = 9) -> str:
 
 
 def log(data, **print_kwargs):
-    seed = _hash_to_five_digits(threading.get_ident())
-    rng = random.Random(seed)
-
-    color = rng.choice(_COLORS)
+    color = _ColorManager().get_thread_color()
     name = _get_short_thread_name()
     tag = f"{Style.RESET_ALL}{color}[{name}]{Style.RESET_ALL}"
 

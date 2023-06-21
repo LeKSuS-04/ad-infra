@@ -23,6 +23,10 @@ Script for easy deployment of Attack-Defense CTFs.
 - `docker-pull` - pulls pre-built image from the Docker Hub;
 - `docker-clean` - removes the image and all the volumes for system, as if the container have never existed.
 
+### Other
+
+- `shell` - drops you into the shell inside the container. Useful for inspecting volumes and debugging stuff in same environment in which everything is executed.
+
 ## More information
 
 You can read more about structure and ideas of this script on the [wiki page](https://github.com/LeKSuS-04/ad-infra/wiki).

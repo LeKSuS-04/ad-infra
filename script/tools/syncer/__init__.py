@@ -1,8 +1,9 @@
 import threading
 from typing import Any
 
+from tools.singleton import Singleton
+
 from .resources import Resource
-from .singleton import Singleton
 
 
 class _Storage:
