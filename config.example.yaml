@@ -1,17 +1,17 @@
 yandex_cloud:
-  # Folder to create resources in
-  # More information: https://cloud.yandex.com/en/docs/resource-manager/operations/folder/get-id
+  # Folder to create resources in.
+  # More information: https://cloud.yandex.com/en/docs/resource-manager/operations/folder/get-id.
   folder_id: your_folder_id_here
 
-  # Zone to create resources in
-  # More information: https://cloud.yandex.com/en/docs/overview/concepts/geo-scope
+  # Zone to create resources in.
+  # More information: https://cloud.yandex.com/en/docs/overview/concepts/geo-scope.
   zone: ru-central1-a
 
-  # Can be generated via `yc iam create-token`
-  # More information: https://cloud.yandex.com/en/docs/iam/operations/iam-token/create
+  # Can be generated via `yc iam create-token`.
+  # More information: https://cloud.yandex.com/en/docs/iam/operations/iam-token/create.
   iam_token: your_iam_token_here
 
-# Directory in `./resources` that contains distributable checkers and services
+# Directory in `./resources` that contains distributable checkers and services.
 src_dirname: ad-training-03-12-2022
 
 # Resources for virtual machines. Each field can accept either integer value, representing
@@ -39,54 +39,57 @@ virtual_machines:
     ram_gb: auto
     ssd_gb: auto
 
-# Credentials from various ForcAD web interfaces
+# Credentials from various ForcAD web interfaces.
 admin:
   username: admin
   password: password
 
 game:
-  # Round duration in seconds
+  # Round duration in seconds.
   round_time: 30
 
   # Timestamp to launch checkers and open network (allows players to attack
-  # each other, submit flags, etc.)
+  # each other, submit flags, etc.).
+  # It is recommended to set this at least 15 minutes in the future from deploying
+  # infrastructure, since the jury usually is deployed and configured faster than
+  # vulnboxes, resulting in lower initial SLA for participants.
   start_time: 2023-12-31 12:00:00
   timezone: Europe/Moscow
 
-  # Default score for tasks
+  # Default score for tasks.
   default_score: 2500
 
-  # Flag lifetime in rounds
+  # Flag lifetime in rounds.
   flag_lifetime: 5
 
   # Sets how much points team is earning for an attack (the higher the hardness,
-  # the bigger raiting change is). Recommended value range is [5; 20]
+  # the bigger raiting change is). Recommended value range is [5; 20].
   game_hardness: 10.0
 
-  # States if whether a team earns points by attacking zero-rating victium
+  # States if whether a team earns points by attacking zero-rating victium.
   inflation: true
 
 # Description of each task for checksystem. Properties are described below:
 # name:
-#   Name of the service, shown on scoreboard
+#   Name of the service, shown on scoreboard.
 # checker:
-#   Path to checker, relative to `<src_path> / checkers`
+#   Path to checker, relative to `<src_path> / checkers`.
 # checker_timeout:
 #   Timeout in seconds for each checker action. As checker performs at least 3
 #   actions each round (check, put, get), it is recommended to set `game.round_time`
-#   to the value at least 3 times greater than max `checker_timeout`
+#   to the value at least 3 times greater than max `checker_timeout`.
 # checker_type:
 #   Underscore-separated tags that describe checker. More info here, in description
 #   of `checker_type` option:
 #   https://github.com/pomo-mondreganto/ForcAD/tree/master#configuration
 # puts:
-#   Amount of flags to put each round
+#   Amount of flags to put each round.
 # gets:
-#   Amount of flags to check each round
+#   Amount of flags to check each round.
 # places:
-#   Amount of possible places for flag in service
+#   Amount of possible places for flag in service.
 # env_path: [optional]
-#   Path or combination of paths to be prepended to `PATH` env variable
+#   Path or combination of paths to be prepended to `PATH` env variable.
 tasks:
   - name: test_basic_service
     checker: test_service/checker.py
@@ -105,10 +108,10 @@ tasks:
     places: 5
 
 teams:
-  # Whether or not an NPC player is added
+  # Whether or not an NPC player is added.
   add_npc: true
 
-  # Amount of players in each team; used to generate correct amount of VPN configs per team
+  # Amount of players in each team; used to generate correct amount of VPN configs per team.
   players_per_team: 5
 
   # Password from zip archives with README-s and vpn configs for teams. Can be set to `null` or `~`
@@ -117,13 +120,13 @@ teams:
 
   # Jinja template for README.md file for each team. Available variables:
   # team:
-  #   model `TeamConfig` from script/models/teams.py
+  #   model `TeamConfig` from ./script/models/teams.py.
   # config:
-  #   model `Config` from script/models/config.py
+  #   model `Config` from ./script/models/config.py.
   # forcad:
-  #   model `ForcadConfig` from script/models/forcad.py
+  #   model `ForcadConfig` from ./script/models/forcad.py.
   # public_jury_ip:
-  #   string, public address of scoreboard
+  #   string, public address of scoreboard.
   readme_template: |
     # Welcome to yet another Attack-Defense CTF!
 
@@ -148,9 +151,9 @@ teams:
     ```
     curl -X PUT --data '["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="]' -H "X-Team-Token: deafbeef" http://10.10.10.10/flags
     ```
-    Note that each request must not contain more than 100 flags
+    Note that each request must not contain more than 100 flags.
 
-    Attack data is available at `/api/client/attack_data/`
+    Attack data is available at `/api/client/attack_data/`.
 
     Example of fetching attack data:
     ```
@@ -160,4 +163,4 @@ teams:
 
     Good luck, have fun!
 
-    Infrastructure by LeKSuS @ https://github.com/LeKSuS-04
+    Infrastructure by LeKSuS @ https://github.com/LeKSuS-04.
