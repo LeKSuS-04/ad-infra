@@ -2,8 +2,8 @@ import yaml
 from models import (
     Config,
     LoadedConfig,
-    LoadedTeam,
     LoadedTeams,
+    Team,
     TerraformConfig,
 )
 from tools import Resource, Syncer, log, task
@@ -22,7 +22,7 @@ def load_config(sync: Syncer):
         log("Loaded and validated teams.yaml")
 
     if loaded_config.teams.add_npc:
-        loaded_teams.teams.append(LoadedTeam(name="NPC"))
+        loaded_teams.teams.append(Team(name="NPC"))
 
     resource_master = ResourceManager(loaded_config.virtual_machines)
     terraform_config = TerraformConfig(

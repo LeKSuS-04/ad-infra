@@ -1,13 +1,11 @@
-from models import LoadedTeam, ResourceEstimationBehaviour
+from models import ResourceEstimationBehaviour, Team
 
 from .abstract import VMResourceManager
 
 
 class VPNResourceManager(VMResourceManager):
     @staticmethod
-    def _guess_cores(
-        behaviour: ResourceEstimationBehaviour, teams: list[LoadedTeam], **kwargs
-    ) -> int:
+    def _guess_cores(behaviour: ResourceEstimationBehaviour, teams: list[Team], **kwargs) -> int:
         match behaviour:
             case ResourceEstimationBehaviour.LOW:
                 cores = len(teams) / 40

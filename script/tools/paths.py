@@ -60,6 +60,8 @@ def team_archive_path(team_name: str, team_num: int) -> Path:
 
 PRIVATE_GENERATED_DIR = ROOT / "private"
 
+TEAMS_TO_VULNBOX_CONFIG_PATH = PRIVATE_GENERATED_DIR / "vulnbox_configs.json"
+
 PRIVATE_VPN_DIR = PRIVATE_GENERATED_DIR / "vpn"
 VPN_JURY_CLIENT_PATH = PRIVATE_VPN_DIR / "client" / "jury.ovpn"
 VPN_JURY_SERVER_PATH = PRIVATE_VPN_DIR / "server" / "jury.conf"

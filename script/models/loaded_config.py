@@ -76,17 +76,17 @@ class LoadedConfig(BaseModel):
     teams: LoadedConfigTeams
 
 
-class LoadedTeam(BaseModel):
+class Team(BaseModel):
     name: str
 
 
 class LoadedTeams(BaseModel):
     """Structure of teams.yaml."""
 
-    teams: list[LoadedTeam]
+    teams: list[Team]
 
     @validator("teams")
-    def must_be_unique(cls, teams: list[LoadedTeam]):  # noqa: N805
+    def must_be_unique(cls, teams: list[Team]):  # noqa: N805
         for team in teams:
             if list(map(lambda t: t.name == team.name, teams)).count(True) > 1:
                 raise ValueError(f'Team "{team.name}" is registered multiple times')

@@ -6,7 +6,7 @@ from .loaded_config import (
     ForcadAdminConfig,
     ForcadTaskConfig,
     GameConfig,
-    LoadedTeam,
+    Team,
     YandexCloudConfig,
 )
 
@@ -34,7 +34,7 @@ class Config(BaseModel):
     game: GameConfig
     tasks: list[ForcadTaskConfig]
     forcad_admin: ForcadAdminConfig
-    teams: list[LoadedTeam]
+    teams: list[Team]
     players_per_team: PositiveInt
     archive_password: str | None
     readme_template: str
