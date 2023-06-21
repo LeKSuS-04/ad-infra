@@ -47,7 +47,7 @@ class ForcadAdminConfig(BaseModel):
 
 class ResourceEstimationBehaviour(Enum):
     LOW = "tiny"
-    MEDIUM = "medium"
+    MEDIUM = "auto"
     BIG = "generous"
 
 

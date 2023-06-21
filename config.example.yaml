@@ -15,11 +15,29 @@ yandex_cloud:
 src_dirname: ad-training-03-12-2022
 
 # Resources for virtual machines. Each field can accept either integer value, representing
-# desired dedicated resources for machine, or on of literals "tiny", "medium" or "generous"
+# desired dedicated resources for machine, or on of literals "tiny", "auto" or "generous"
 # Also each of VM fields themselves (and even the root, `vurtual_machines`) can accept literals,
 # which will apply that value for all children. Literal values make this script to auto-estimate
 # required amount of resourses for each VM based on different facts it can find.
-virtual_machines: medium
+# This configuration is here just for the sake of an example, it is equivalent to this one line:
+# virtual_machines: auto
+virtual_machines:
+  jury:
+    cores: auto
+    ram_gb: auto
+    ssd_gb: auto
+  vpn:
+    cores: auto
+    ram_gb: auto
+    ssd_gb: auto
+  vulnbox:
+    cores: auto
+    ram_gb: auto
+    ssd_gb: auto
+  bastion:
+    cores: auto
+    ram_gb: auto
+    ssd_gb: auto
 
 # Credentials from various ForcAD web interfaces
 admin:
