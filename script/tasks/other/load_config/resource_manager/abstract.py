@@ -92,7 +92,7 @@ class VMResourceManager(metaclass=ABCMeta):
         ...
 
     def get_config(self, config: LoadedConfig, teams: list[LoadedTeam]) -> VMConfig:
-        config_kwargs = {'config': config, 'teams': teams}
+        config_kwargs = {"config": config, "teams": teams}
         return VMConfig(
             cores=self._cores(**config_kwargs),
             ram_gb=self._ram_gb(**config_kwargs),
