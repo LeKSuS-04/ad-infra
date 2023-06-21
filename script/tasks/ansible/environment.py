@@ -1,7 +1,13 @@
 import os
 
 from tools import process
-from tools.paths import ANSIBLE_CONFIG_PATH, ANSIBLE_INVENTORY_PATH, ANSIBLE_LIBRARY_DIR
+from tools.paths import (
+    ANSIBLE_CONFIG_PATH,
+    ANSIBLE_HOME,
+    ANSIBLE_INVENTORY_PATH,
+    ANSIBLE_LIBRARY_DIR,
+    ANSIBLE_TEMPORARY_DIR,
+)
 
 
 def run_with_ansible_env(command: str, **options) -> bytes:
@@ -9,6 +15,8 @@ def run_with_ansible_env(command: str, **options) -> bytes:
     environment["ANSIBLE_CONFIG"] = ANSIBLE_CONFIG_PATH
     environment["ANSIBLE_LIBRARY"] = ANSIBLE_LIBRARY_DIR
     environment["ANSIBLE_INVENTORY"] = ANSIBLE_INVENTORY_PATH
+    environment["DEFAULT_LOCAL_TMP"] = ANSIBLE_TEMPORARY_DIR
+    environment["HOME"] = ANSIBLE_HOME
 
     if options.get("env") is not None:
         options["env"] |= environment

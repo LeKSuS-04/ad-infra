@@ -8,7 +8,7 @@ ROOT = Path("/")
 
 CONFIG_PATH = CWD / "config.yaml"
 TEAMS_CONFIG_PATH = CWD / "teams.yaml"
-
+TEMPORARY_DIR = ROOT / "tmp"
 
 ################# ANSIBLE #################
 
@@ -20,7 +20,8 @@ ANSIBLE_PLAYBOOKS_DIR = ANSIBLE_DIR / "playbooks"
 ANSIBLE_JURY_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "jury_conf.yaml"
 ANSIBLE_VPN_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vpn_conf.yaml"
 ANSIBLE_VULNBOXES_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vulnboxes_conf.yaml"
-
+ANSIBLE_HOME = TEMPORARY_DIR
+ANSIBLE_TEMPORARY_DIR = TEMPORARY_DIR
 
 ################# TERRAFORM #################
 

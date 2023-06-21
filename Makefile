@@ -3,6 +3,7 @@ USER=$(shell id -u)
 GROUP=$(shell id -g)
 
 DOCKER_RUN=docker run \
+	--volume "/etc/passwd:/etc/passwd:ro" \
 	--volume "$(CWD)/config.yaml:/app/config.yaml:ro" \
 	--volume "$(CWD)/teams.yaml:/app/teams.yaml:ro" \
 	--volume "$(CWD)/generated/:/app/generated/" \
@@ -10,6 +11,7 @@ DOCKER_RUN=docker run \
 	--volume "ad-infra-terraform:/app/terraform" \
 	--volume "ad-infra-ansible:/app/ansible" \
 	--volume "ad-infra-internal:/private" \
+	--user "$(USER)" \
 	--interactive \
 	--tty \
 	--rm
