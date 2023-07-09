@@ -39,7 +39,7 @@ docker-build:
 
 .PHONY: docker-pull
 docker-pull:
-	docker pull ad-infra:latest
+	docker pull iamleksus/ad-infra:latest
 
 .PHONY: docker-clean
 docker-clean:
