@@ -16,17 +16,17 @@ ENV PYTHONUNBUFFERED=1
 COPY ./requirements.txt .
 RUN pip install --no-cache --upgrade -r requirements.txt
 
-# Copy source files
+# Initialize terraform
+COPY --chmod=777 terraform/ ./terraform/
+ENV TF_CLI_CONFIG_FILE=/app/terraform/mirror.tfrc
+RUN terraform -chdir=./terraform init
+
+# Copy other source files
 COPY --chmod=755 script/ ./script/
 COPY --chmod=777 ansible/ ./ansible/
-COPY --chmod=777 terraform/ ./terraform/
 
 # Manage permissions on directories used to write files
 RUN mkdir /private
 RUN chmod 777 /private ./terraform ./ansible
-
-# Initialize terraform
-ENV TF_CLI_CONFIG_FILE=/app/terraform/mirror.tfrc
-RUN terraform -chdir=./terraform init
 
 ENTRYPOINT [ "./script/main.py" ]

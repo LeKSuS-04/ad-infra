@@ -1,8 +1,8 @@
 from models import (
     LoadedConfig,
-    LoadedTeam,
     ResourceEstimationBehaviour,
     ResourcesPerVMConfig,
+    Team,
     VMConfig,
     VMResources,
 )
@@ -30,18 +30,18 @@ class ResourceManager:
                 self._vpn_config
             ) = self._vulnbox_config = self._bastion_config = resource_config
 
-    def get_jury_resources(self, config: LoadedConfig, teams: list[LoadedTeam]) -> VMConfig:
+    def get_jury_resources(self, config: LoadedConfig, teams: list[Team]) -> VMConfig:
         guesser = JuryResourceManager(self._jury_config)
         return guesser.get_config(config, teams)
 
-    def get_vpn_resources(self, config: LoadedConfig, teams: list[LoadedTeam]) -> VMConfig:
+    def get_vpn_resources(self, config: LoadedConfig, teams: list[Team]) -> VMConfig:
         guesser = VPNResourceManager(self._vpn_config)
         return guesser.get_config(config, teams)
 
-    def get_vulnbox_resources(self, config: LoadedConfig, teams: list[LoadedTeam]) -> VMConfig:
+    def get_vulnbox_resources(self, config: LoadedConfig, teams: list[Team]) -> VMConfig:
         guesser = VulnboxResourceManager(self._vulnbox_config)
         return guesser.get_config(config, teams)
 
-    def get_bastion_resources(self, config: LoadedConfig, teams: list[LoadedTeam]) -> VMConfig:
+    def get_bastion_resources(self, config: LoadedConfig, teams: list[Team]) -> VMConfig:
         guesser = BastionResourceManager(self._bastion_config)
         return guesser.get_config(config, teams)

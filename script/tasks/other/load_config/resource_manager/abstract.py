@@ -4,8 +4,8 @@ from typing import Protocol
 
 from models import (
     LoadedConfig,
-    LoadedTeam,
     ResourceEstimationBehaviour,
+    Team,
     VMConfig,
     VMResources,
 )
@@ -16,7 +16,7 @@ class GuesserFunction(Protocol):
         self,
         behaviour: int | ResourceEstimationBehaviour,
         config: LoadedConfig,
-        teams: list[LoadedTeam],
+        teams: list[Team],
     ) -> int:
         ...
 
@@ -44,7 +44,7 @@ class VMResourceManager(metaclass=ABCMeta):
         value: int | ResourceEstimationBehaviour,
         guesser: GuesserFunction,
         config: LoadedConfig,
-        teams: list[LoadedTeam],
+        teams: list[Team],
     ) -> int:
         if isinstance(value, int):
             return value
@@ -71,7 +71,7 @@ class VMResourceManager(metaclass=ABCMeta):
     def _guess_cores(
         behaviour: int | ResourceEstimationBehaviour,  # type: ignore # noqa: N805
         config: LoadedConfig,
-        teams: list[LoadedTeam],
+        teams: list[Team],
     ) -> int:
         ...
 
@@ -79,7 +79,7 @@ class VMResourceManager(metaclass=ABCMeta):
     def _guess_ram(
         behaviour: int | ResourceEstimationBehaviour,  # type: ignore # noqa: N805
         config: LoadedConfig,
-        teams: list[LoadedTeam],
+        teams: list[Team],
     ) -> int:  # type: ignore
         ...
 
@@ -87,12 +87,12 @@ class VMResourceManager(metaclass=ABCMeta):
     def _guess_ssd(
         behaviour: int | ResourceEstimationBehaviour,  # type: ignore # noqa: N805
         config: LoadedConfig,
-        teams: list[LoadedTeam],
+        teams: list[Team],
     ) -> int:  # type: ignore
         ...
 
-    def get_config(self, config: LoadedConfig, teams: list[LoadedTeam]) -> VMConfig:
-        config_kwargs = {'config': config, 'teams': teams}
+    def get_config(self, config: LoadedConfig, teams: list[Team]) -> VMConfig:
+        config_kwargs = {"config": config, "teams": teams}
         return VMConfig(
             cores=self._cores(**config_kwargs),
             ram_gb=self._ram_gb(**config_kwargs),

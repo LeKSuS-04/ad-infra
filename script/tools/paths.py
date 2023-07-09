@@ -15,13 +15,10 @@ TEMPORARY_DIR = ROOT / "tmp"
 ANSIBLE_DIR = CWD / "ansible"
 ANSIBLE_CONFIG_PATH = ANSIBLE_DIR / "ansible.cfg"
 ANSIBLE_INVENTORY_PATH = ANSIBLE_DIR / "inventory.yaml"
-ANSIBLE_LIBRARY_DIR = ANSIBLE_DIR / "library"
 ANSIBLE_PLAYBOOKS_DIR = ANSIBLE_DIR / "playbooks"
 ANSIBLE_JURY_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "jury_conf.yaml"
 ANSIBLE_VPN_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vpn_conf.yaml"
 ANSIBLE_VULNBOXES_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vulnboxes_conf.yaml"
-ANSIBLE_HOME = TEMPORARY_DIR
-ANSIBLE_TEMPORARY_DIR = TEMPORARY_DIR
 
 ################# TERRAFORM #################
 
@@ -62,6 +59,8 @@ def team_archive_path(team_name: str, team_num: int) -> Path:
 ################# PRIVATE #################
 
 PRIVATE_GENERATED_DIR = ROOT / "private"
+
+TEAMS_TO_VULNBOX_CONFIG_PATH = PRIVATE_GENERATED_DIR / "vulnbox_configs.json"
 
 PRIVATE_VPN_DIR = PRIVATE_GENERATED_DIR / "vpn"
 VPN_JURY_CLIENT_PATH = PRIVATE_VPN_DIR / "client" / "jury.ovpn"

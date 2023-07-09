@@ -1,6 +1,6 @@
 from math import ceil
 
-from models import LoadedConfig, LoadedTeam, ResourceEstimationBehaviour
+from models import LoadedConfig, ResourceEstimationBehaviour, Team
 
 from .abstract import VMResourceManager
 
@@ -8,7 +8,7 @@ from .abstract import VMResourceManager
 class JuryResourceManager(VMResourceManager):
     @staticmethod
     def _guess_cores(
-        behaviour: ResourceEstimationBehaviour, config: LoadedConfig, teams: list[LoadedTeam]
+        behaviour: ResourceEstimationBehaviour, config: LoadedConfig, teams: list[Team]
     ) -> int:
         match behaviour:
             case ResourceEstimationBehaviour.LOW:
@@ -28,7 +28,7 @@ class JuryResourceManager(VMResourceManager):
 
     @staticmethod
     def _guess_ssd(
-        behaviour: ResourceEstimationBehaviour, config: LoadedConfig, teams: list[LoadedTeam]
+        behaviour: ResourceEstimationBehaviour, config: LoadedConfig, teams: list[Team]
     ) -> int:
         match behaviour:
             case ResourceEstimationBehaviour.LOW:
