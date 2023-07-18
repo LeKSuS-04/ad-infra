@@ -14,8 +14,8 @@
       vars:
         vpn_client_config_local_path: "{{ vpn_client_file }}"
 
-    - name: Start ForcAD
-      role: start_forcad
+    - name: Prepare ForcAD
+      role: prepare_forcad
       vars:
         forcad_config_local_path: "{{ forcad_config_file }}"
         checkers_local_path: "{{ checkers_path }}"

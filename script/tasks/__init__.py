@@ -9,11 +9,12 @@ TASK_LIST = [
     other.save_forcad_config,
     other.plan_resources,
     #
+    ansible.start_forcad,
     ansible.configure_jury,
     ansible.configure_vpn,
     ansible.configure_vulnboxes,
     ansible.ping_all_hosts,
-    ansible.prepare_inventory,
+    ansible.prepare_ansible,
     #
     terraform.deploy_infrastructure,
     terraform.destroy_infrastructure,

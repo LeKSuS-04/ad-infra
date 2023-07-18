@@ -1,0 +1,57 @@
+---
+- name: Install ForcAD
+  become: true
+  block:
+    - name: Ensure unzip is installed
+      ansible.builtin.apt:
+        pkg: unzip=6.0-26ubuntu3.1
+        state: present
+        update_cache: true
+
+    - name: Download end extract ForcAD source code
+      ansible.builtin.unarchive:
+        dest: /
+        remote_src: true
+        src: https://github.com/pomo-mondreganto/ForcAD/releases/download/v1.4.0/ForcAD_v1.4.0.zip
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Get name of ForcAD directory
+      ansible.builtin.find:
+        path: /
+        file_type: directory
+        pattern: ForcAD*
+      register: found_forcad_dirs
+
+    - name: Save ForcAD directory
+      ansible.builtin.set_fact:
+        forcad_dir: "{{ found_forcad_dirs.files[0].path }}"
+
+- name: Copy ForcAD config to jury host
+  ansible.builtin.copy:
+    src: "{{ forcad_config_local_path }}"
+    dest: "{{ [forcad_dir, 'config.yml'] | path_join }}"
+
+- name: Copy checkers to jury host
+  ansible.builtin.copy:
+    # Add suffix '/' to ensure that only checkers (not directory with checkers) are transfered
+    src: "{{ checkers_local_path + '/' }}"
+    dest: "{{ [forcad_dir, 'checkers'] | path_join }}"
+    mode: preserve
+
+- name: Prepare ForcAD for launch
+  become: true
+  block:
+    - name: Install requirements for ForcAD cli
+      ansible.builtin.pip:
+        requirements: "{{ [forcad_dir, 'cli', 'requirements.txt'] | path_join }}"
+
+    - name: Setup ForcAD
+      ansible.builtin.command:
+        cmd: ./control.py setup
+        chdir: "{{ forcad_dir }}"
+
+    - name: Build ForcAD services
+      ansible.builtin.command:
+        cmd: ./control.py build
+        chdir: "{{ forcad_dir }}"
