@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from models import Config, VulnboxConfig
 from tools import Resource, Syncer, task
 from tools.paths import (
+    ANSIBLE_CONFIG_PATH,
     ANSIBLE_INVENTORY_PATH,
     FORCAD_CONFIG_PATH,
     PRIV_SSH_KEY_FILE_PATH,
@@ -21,28 +22,12 @@ _JINJA_ENV = Environment(
 )
 
 
-@task(
-    depends_on=[
-        Resource.CONFIG,
-        Resource.VULNBOX_CONFIGS,
-        Resource.BASTION_HOST_IP,
-        Resource.JURY_HOST_IP,
-        Resource.VPN_HOST_IP,
-    ],
-    depends_on_boolean=[
-        Resource.ADMIN_SSH_KEY_FILE_SAVED_TO_DISK,
-    ],
-    creates=[
-        Resource.ANSIBLE_INVENTORY_SAVED_TO_DISK,
-    ],
-)
 def prepare_inventory(
-    sync: Syncer,
     config: Config,
-    vulnbox_configs: dict[str, VulnboxConfig],
+    vpn_host: str,
     bastion_host: str,
     jury_host: str,
-    vpn_host: str,
+    vulnbox_configs: dict[str, VulnboxConfig],
 ):
     template_params = dict(
         admin_username="admin",
@@ -69,4 +54,40 @@ def prepare_inventory(
         inventory_template = _JINJA_ENV.get_template("inventory.yaml.j2")
         rendered = inventory_template.render(**template_params)
         f.write(cast(str, rendered))
-    sync.set_resource(Resource.ANSIBLE_INVENTORY_SAVED_TO_DISK)
+
+
+def prepare_config(amount_of_teams: int):
+    template_params = dict(forks=amount_of_teams)
+
+    with open(ANSIBLE_CONFIG_PATH, "w") as f:
+        inventory_template = _JINJA_ENV.get_template("ansible.cfg.j2")
+        rendered = inventory_template.render(**template_params)
+        f.write(cast(str, rendered))
+
+
+@task(
+    depends_on=[
+        Resource.CONFIG,
+        Resource.VULNBOX_CONFIGS,
+        Resource.BASTION_HOST_IP,
+        Resource.JURY_HOST_IP,
+        Resource.VPN_HOST_IP,
+    ],
+    depends_on_boolean=[
+        Resource.ADMIN_SSH_KEY_FILE_SAVED_TO_DISK,
+    ],
+    creates=[
+        Resource.ANSIBLE_CONFIGURED,
+    ],
+)
+def prepare_ansible(
+    sync: Syncer,
+    config: Config,
+    vulnbox_configs: dict[str, VulnboxConfig],
+    bastion_host: str,
+    jury_host: str,
+    vpn_host: str,
+):
+    prepare_inventory(config, vpn_host, bastion_host, jury_host, vulnbox_configs)
+    prepare_config(len(config.teams))
+    sync.set_resource(Resource.ANSIBLE_CONFIGURED)

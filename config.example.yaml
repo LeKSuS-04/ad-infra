@@ -84,7 +84,7 @@ teams:
 
     ### VPN network structure
     * Jury system (ForcAD): `10.10.10.10`
-    * Vulnboxes: `10.{{ (config.teams | length) // 256 }}.{{ (config.teams | length) % 256 }}.2`
+    * Vulnboxes: `10.{{ 80 + (config.teams | length) // 256 }}.[1-{{ ((config.teams | length)) % 256 }}].2`
     * Network opens at `{{ config.game.start_time }}` using `{{ config.game.timezone }}` timezone!
 
     ### Jury config

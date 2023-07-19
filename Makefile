@@ -35,7 +35,7 @@ shell:
 
 .PHONY: docker-build
 docker-build:
-	docker build --tag ad-infra .
+	DOCKER_BUILDKIT=1 docker build --tag ad-infra .
 
 .PHONY: docker-pull
 docker-pull:

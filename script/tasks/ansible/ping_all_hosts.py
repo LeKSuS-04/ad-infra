@@ -37,7 +37,7 @@ def _get_active_hosts() -> set[str]:
         Resource.VULNBOX_HOSTS_IPS,
     ],
     depends_on_boolean=[
-        Resource.ANSIBLE_INVENTORY_SAVED_TO_DISK,
+        Resource.ANSIBLE_CONFIGURED,
     ],
     creates=[
         Resource.JURY_HOST_UP,

@@ -7,7 +7,7 @@ class Resource(Enum):
     ADMIN_SSH_KEY = auto()
     ADMIN_SSH_KEY_FILE_SAVED_TO_DISK = auto()
     TERRAFORM_CONFIG_SAVED_TO_DISK = auto()
-    ANSIBLE_INVENTORY_SAVED_TO_DISK = auto()
+    ANSIBLE_CONFIGURED = auto()
     VULNBOX_CONFIGS = auto()
     FORCAD_CONFIG = auto()
     FORCAD_CONFIG_FILE_SAVED_TO_DISK = auto()
@@ -24,6 +24,7 @@ class Resource(Enum):
     VPN_HOST_CONFIGURED = auto()
     JURY_HOST_CONFIGURED = auto()
     ALL_VULNBOX_HOSTS_CONFIGURED = auto()
+    FORCAD_STARTED = auto()
 
     TERRAFORM_DESTROYED = auto()
     FILESYSTEM_CLEANED = auto()
