@@ -1,5 +1,6 @@
 [defaults]
 host_key_checking = False
+pipelining = True
 library = ./library
 home = /tmp
 local_tmp = /tmp
@@ -7,3 +8,4 @@ forks = {{forks}}
 
 [ssh_connection]
 control_path_dir = /tmp/control_path
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s
