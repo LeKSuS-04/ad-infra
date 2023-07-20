@@ -27,7 +27,11 @@ def configure_jury(sync: Syncer):
 
 
 @task(
-    depends_on_boolean=[Resource.JURY_HOST_CONFIGURED, Resource.ALL_VULNBOX_HOSTS_CONFIGURED],
+    depends_on_boolean=[
+        Resource.JURY_HOST_CONFIGURED,
+        Resource.ALL_VULNBOX_HOSTS_CONFIGURED,
+        Resource.VPN_HOST_CONFIGURED,
+    ],
     creates=[Resource.FORCAD_STARTED, Resource.TEAM_TOKENS],
 )
 def start_forcad(sync: Syncer):
