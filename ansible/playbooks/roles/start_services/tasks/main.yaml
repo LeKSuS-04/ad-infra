@@ -18,6 +18,7 @@
         # (directories with services themselves) will be copied
         src: "{{ services_local_path + '/' }}"
         dest: "{{ services_remote_path }}"
+        mode: preserve
 
     - name: Get names of service directories
       ansible.builtin.find:
@@ -29,4 +30,5 @@
       community.docker.docker_compose:
         project_src: "{{ item.path }}"
         state: present
+        build: true
       loop: "{{ services.files }}"
