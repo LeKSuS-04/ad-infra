@@ -1,6 +1,7 @@
 ---
 - name: Configure VPN host
   hosts: vpn
+  strategy: free
   roles:
     # https://www.reddit.com/r/ansible/comments/i5ilw6/comment/g0pj6o5
     - name: Disable unattended-upgrades service

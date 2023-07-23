@@ -17,6 +17,19 @@ def _get_status_str(status_up: bool) -> str:
     return "up" if status_up else "down"
 
 
+def _get_active_hosts() -> set[str]:
+    try:
+        output = run_with_ansible_env("ansible all -m ping")
+        return _get_active_hosts_from_output(output.decode())
+    except ValueError as ex:
+        # If 'code 4' in exception, that means that ansilbe process terminated with exit code 4.
+        # Ansible terminates with code 4 if some targets are unreachable, which is expected on
+        # a couple of first iterations.
+        if 'code 4' not in str(ex):
+            raise ex
+        return set()
+
+
 @task(
     depends_on=[
         Resource.JURY_HOST_PUBLIC_IP,
