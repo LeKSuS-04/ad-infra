@@ -7,14 +7,17 @@ from tools import Resource, Syncer, task
 from tools.paths import (
     ANSIBLE_CONFIG_PATH,
     ANSIBLE_INVENTORY_PATH,
+    CONTAINER_REGISTRY_SERVICE_DIR,
+    DOCKER_DAEMON_CONFIG_PATH,
     FORCAD_CONFIG_PATH,
     PRIV_SSH_KEY_FILE_PATH,
+    PRIVATE_VPN_DIR,
     VPN_JURY_CLIENT_PATH,
     checkers_dir,
     services_dir,
 )
 
-from .utils import get_all_vpn_server_paths, to_ansible_vunlbox_config
+from .utils import to_ansible_vunlbox_config
 
 _TEMPLATE_PATH = Path(__file__).parent
 _JINJA_ENV = Environment(
@@ -27,6 +30,7 @@ def prepare_inventory(
     vpn_host: str,
     bastion_host: str,
     jury_host: str,
+    container_registry_host: str,
     vulnbox_configs: dict[str, VulnboxConfig],
 ):
     template_params = dict(
@@ -36,7 +40,7 @@ def prepare_inventory(
         team_count=len(config.teams),
         network_open_time=config.game.start_time,
         timezone=config.game.timezone,
-        vpn_server_files=get_all_vpn_server_paths(config),
+        vpn_server_files=PRIVATE_VPN_DIR,
         vpn_host=vpn_host,
         #
         bastion_host=bastion_host,
@@ -45,6 +49,10 @@ def prepare_inventory(
         checkers_path=checkers_dir(config.src_dirname),
         forcad_config_file=FORCAD_CONFIG_PATH,
         jury_vpn_client=VPN_JURY_CLIENT_PATH,
+        #
+        container_registry_host=container_registry_host,
+        docker_daemon_config_file=DOCKER_DAEMON_CONFIG_PATH,
+        service_registry_local_path=CONTAINER_REGISTRY_SERVICE_DIR,
         #
         services_path=services_dir(config.src_dirname),
         vulnbox_hosts=to_ansible_vunlbox_config(vulnbox_configs),
@@ -69,9 +77,10 @@ def prepare_config(amount_of_teams: int):
     depends_on=[
         Resource.CONFIG,
         Resource.VULNBOX_CONFIGS,
-        Resource.BASTION_HOST_IP,
-        Resource.JURY_HOST_IP,
-        Resource.VPN_HOST_IP,
+        Resource.BASTION_HOST_PUBLIC_IP,
+        Resource.JURY_HOST_PUBLIC_IP,
+        Resource.VPN_HOST_PUBLIC_IP,
+        Resource.CONTAINER_REGISTRY_HOST_PUBLIC_IP,
     ],
     depends_on_boolean=[
         Resource.ADMIN_SSH_KEY_FILE_SAVED_TO_DISK,
@@ -87,7 +96,10 @@ def prepare_ansible(
     bastion_host: str,
     jury_host: str,
     vpn_host: str,
+    container_registry_host: str,
 ):
-    prepare_inventory(config, vpn_host, bastion_host, jury_host, vulnbox_configs)
+    prepare_inventory(
+        config, vpn_host, bastion_host, jury_host, container_registry_host, vulnbox_configs
+    )
     prepare_config(len(config.teams))
     sync.set_resource(Resource.ANSIBLE_CONFIGURED)

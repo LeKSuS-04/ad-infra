@@ -1,0 +1,26 @@
+---
+- name: Create directory for cofniguration files
+  become: true
+  become_user: root
+  ansible.builtin.file:
+    path: "{{ service_registry_remote_path }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+
+- name: Copy configuration files
+  ansible.posix.synchronize:
+    src: "{{ service_registry_local_path + '/' }}"
+    dest: "{{ service_registry_remote_path }}"
+    mode: push
+    use_ssh_args: true
+    archive: true
+    compress: true
+    recursive: true
+    perms: true
+  register: registry_service
+
+- name: Run services with docker compose
+  community.docker.docker_compose:
+    project_src: "{{ service_registry_remote_path }}"
+    state: present
+    build: true

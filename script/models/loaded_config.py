@@ -62,6 +62,7 @@ class ResourcesPerVMConfig(BaseModel):
     vpn: VMResources | ResourceEstimationBehaviour
     vulnbox: VMResources | ResourceEstimationBehaviour
     bastion: VMResources | ResourceEstimationBehaviour
+    container_registry: VMResources | ResourceEstimationBehaviour
 
 
 class LoadedConfig(BaseModel):

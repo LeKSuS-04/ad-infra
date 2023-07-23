@@ -22,7 +22,7 @@ def load_config(sync: Syncer):
         log("Loaded and validated teams.yaml")
 
     if loaded_config.teams.add_npc:
-        loaded_teams.teams.append(Team(name="NPC"))
+        loaded_teams.teams.append(Team(name="🤖 NPC 🤖"))
 
     resource_master = ResourceManager(loaded_config.virtual_machines)
     terraform_config = TerraformConfig(
@@ -32,6 +32,9 @@ def load_config(sync: Syncer):
         vpn_vm=resource_master.get_vpn_resources(loaded_config, loaded_teams.teams),
         vulnbox_vm=resource_master.get_vulnbox_resources(loaded_config, loaded_teams.teams),
         bastion_vm=resource_master.get_bastion_resources(loaded_config, loaded_teams.teams),
+        container_registry_vm=resource_master.get_container_registry_resources(
+            loaded_config, loaded_teams.teams
+        ),
     )
 
     config = Config(

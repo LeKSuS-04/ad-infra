@@ -5,6 +5,8 @@ all:
         ansible_user: {{admin_username}}
         ansible_ssh_private_key_file: {{admin_ssh_key_file_path}}
 
+        docker_daemon_config_file: {{docker_daemon_config_file}}
+
       children:
         vulnboxes:
           vars:
@@ -25,10 +27,7 @@ all:
             team_count: {{team_count}}
             network_open_time: {{network_open_time}}
             timezone: {{timezone}}
-            vpn_server_files:
-              {%- for vpn_server_file in vpn_server_files %}
-              - {{vpn_server_file}}
-              {%- endfor %}
+            vpn_server_files: {{vpn_server_files}}
           hosts:
             {{vpn_host}}:
 
@@ -40,3 +39,8 @@ all:
           hosts:
             {{jury_host}}:
 
+        container_registry:
+          vars:
+            service_registry_local_path: {{service_registry_local_path}}
+          hosts:
+            {{container_registry_host}}:

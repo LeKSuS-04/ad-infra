@@ -35,7 +35,7 @@ def _generate(teams: list[Team], vulnbox_hosts: list[str]) -> dict[str, VulnboxC
 
 
 @task(
-    depends_on=[Resource.CONFIG, Resource.VULNBOX_HOSTS_IPS],
+    depends_on=[Resource.CONFIG, Resource.VULNBOX_HOSTS_INTERNAL_IPS],
     depends_on_boolean=[Resource.VPN_CONFIGS_SAVED_TO_DISK],
     creates=[Resource.VULNBOX_CONFIGS],
 )

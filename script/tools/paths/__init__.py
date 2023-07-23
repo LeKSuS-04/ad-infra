@@ -1,5 +1,13 @@
 from pathlib import Path
+from random import choice
 from string import ascii_letters, digits
+
+from .chars_to_ascii_alphanum import normalize_char
+
+
+def random_string(length: int = 32, alpha: str = ascii_letters + digits):
+    return ''.join(choice(alpha) for _ in range(length))
+
 
 ################# GENERAL #################
 
@@ -15,11 +23,15 @@ TEMPORARY_DIR = ROOT / "tmp"
 ANSIBLE_DIR = CWD / "ansible"
 ANSIBLE_CONFIG_PATH = ANSIBLE_DIR / "ansible.cfg"
 ANSIBLE_INVENTORY_PATH = ANSIBLE_DIR / "inventory.yaml"
+
 ANSIBLE_PLAYBOOKS_DIR = ANSIBLE_DIR / "playbooks"
 ANSIBLE_JURY_CONF_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "jury_conf.yaml"
 ANSIBLE_JURY_RUN_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "jury_run.yaml"
 ANSIBLE_VPN_CONF_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vpn_conf.yaml"
 ANSIBLE_VULNBOXES_CONF_PLAYBOOK_PATH = ANSIBLE_PLAYBOOKS_DIR / "vulnboxes_conf.yaml"
+ANSIBLE_CONTAINER_REGISTRY_CONF_PLAYBOOK_PATH = (
+    ANSIBLE_PLAYBOOKS_DIR / "container_registry_conf.yaml"
+)
 
 ################# TERRAFORM #################
 
@@ -27,6 +39,11 @@ TERRAFORM_DIR = CWD / "terraform"
 TERRAFORM_CONFIG_PATH = TERRAFORM_DIR / "variables.auto.tfvars.json"
 TERRAFORM_CLOUD_INIT_CONFIG_PATH = TERRAFORM_DIR / "cloud-init.yaml"
 
+
+################# SERVICES #################
+
+SERVICES_DIR = CWD / "services"
+CONTAINER_REGISTRY_SERVICE_DIR = SERVICES_DIR / "container_registry"
 
 ################# PUBLIC #################
 
@@ -41,14 +58,10 @@ PUBLIC_VPN_DIR = PUBLIC_GENERATED_DIR / "vpn"
 
 
 def _normalize_team_name(team_name: str) -> str:
-    allowed_chars = set(ascii_letters + digits + "_-.")
-    team_name = team_name.replace(" ", "_")
-
-    for char in set(team_name):
-        if char not in allowed_chars:
-            team_name = team_name.replace(char, "")
-
-    return team_name
+    normalized_team_name = ""
+    for char in team_name:
+        normalized_team_name += normalize_char(char)
+    return normalized_team_name
 
 
 def team_archive_path(team_name: str, team_num: int) -> Path:
@@ -83,6 +96,10 @@ def vpn_team_client_path(team_num: int, player_num: int) -> Path:
 def vpn_team_server_path(team_num: int) -> Path:
     return PRIVATE_VPN_DIR / "server" / f"team{team_num:03}.conf"
 
+
+ANSIBLE_RETRY_FILES_DIR = PRIVATE_GENERATED_DIR / 'ansible_retry'
+
+DOCKER_DAEMON_CONFIG_PATH = PRIVATE_GENERATED_DIR / 'docker.json'
 
 ################# RESOURCES #################
 

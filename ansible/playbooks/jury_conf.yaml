@@ -8,6 +8,8 @@
 
     - name: Install docker engine
       role: install_docker
+      vars:
+        daemon_config: "{{ docker_daemon_config_file }}"
 
     - name: Connect to game network
       role: connect_vpn_client

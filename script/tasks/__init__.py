@@ -8,11 +8,13 @@ TASK_LIST = [
     other.pack_team_archives,
     other.save_forcad_config,
     other.plan_resources,
+    other.prepare_docker_config,
     #
     ansible.start_forcad,
     ansible.configure_jury,
     ansible.configure_vpn,
     ansible.configure_vulnboxes,
+    ansible.configure_container_registry,
     ansible.ping_all_hosts,
     ansible.prepare_ansible,
     #

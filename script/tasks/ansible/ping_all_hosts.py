@@ -19,9 +19,10 @@ def _get_status_str(status_up: bool) -> str:
 
 @task(
     depends_on=[
-        Resource.JURY_HOST_IP,
-        Resource.VPN_HOST_IP,
-        Resource.VULNBOX_HOSTS_IPS,
+        Resource.JURY_HOST_PUBLIC_IP,
+        Resource.VPN_HOST_PUBLIC_IP,
+        Resource.CONTAINER_REGISTRY_HOST_PUBLIC_IP,
+        Resource.VULNBOX_HOSTS_INTERNAL_IPS,
     ],
     depends_on_boolean=[
         Resource.ANSIBLE_CONFIGURED,
@@ -29,12 +30,16 @@ def _get_status_str(status_up: bool) -> str:
     creates=[
         Resource.JURY_HOST_UP,
         Resource.VPN_HOST_UP,
+        Resource.CONTAINER_REGISTRY_HOST_UP,
         Resource.ALL_VULNBOX_HOSTS_UP,
     ],
 )
-def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: str):
+def ping_all_hosts(  # noqa: C901
+    sync: Syncer, jury_host: str, vpn_host: str, container_registry_host: str, vulnbox_hosts: str
+):
     jury_up = False
     vpn_up = False
+    container_registry_up = False
     all_vulnboxes_up = False
 
     while True:
@@ -54,6 +59,12 @@ def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: s
                 sync.set_resource(Resource.VPN_HOST_UP)
                 log("VPN is up!")
 
+        if not container_registry_up:
+            container_registry_up |= container_registry_host in active_hosts
+            if vpn_up:
+                sync.set_resource(Resource.CONTAINER_REGISTRY_HOST_UP)
+                log("Container registry is up!")
+
         vulnbox_active_count = sum(host in active_hosts for host in vulnbox_hosts)
         if not all_vulnboxes_up:
             all_vulnboxes_up |= vulnbox_active_count == len(vulnbox_hosts)
@@ -65,10 +76,11 @@ def ping_all_hosts(sync: Syncer, jury_host: str, vpn_host: str, vulnbox_hosts: s
             f"Host statuses summary: "
             f"jury {_get_status_str(jury_up)}, "
             f"vpn {_get_status_str(vpn_up)}, "
+            f"container registry {_get_status_str(container_registry_up)}, "
             f"vulnboxes {vulnbox_active_count} up out of {len(vulnbox_hosts)}"
         )
 
-        if jury_up and vpn_up and all_vulnboxes_up:
+        if jury_up and vpn_up and container_registry_up and all_vulnboxes_up:
             log("All hosts are up!")
             return
         else:

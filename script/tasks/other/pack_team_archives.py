@@ -42,7 +42,7 @@ def _generate_readme(
         Resource.VULNBOX_CONFIGS,
         Resource.FORCAD_CONFIG,
         Resource.TEAM_TOKENS,
-        Resource.JURY_HOST_IP,
+        Resource.JURY_HOST_PUBLIC_IP,
     ],
     creates=[Resource.TEAM_ARCHIVES_SAVED_TO_DISK],
 )

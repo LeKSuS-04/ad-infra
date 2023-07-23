@@ -121,3 +121,29 @@ resource "yandex_compute_instance" "vpn" {
 
   metadata = local.shared_metadata
 }
+
+resource "yandex_compute_instance" "container-registry" {
+  description = "DockerHub mirror that caches docker images"
+  name        = "container-registry"
+  hostname    = "container-registry"
+
+  resources {
+    cores  = var.container_registry_vm.cores
+    memory = var.container_registry_vm.ram_gb
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = yandex_compute_image.ubuntu-2204-lts.id
+      type     = "network-ssd"
+      size     = var.container_registry_vm.ssd_gb
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.admin_subnet.id
+    nat       = true
+  }
+
+  metadata = local.shared_metadata
+}
