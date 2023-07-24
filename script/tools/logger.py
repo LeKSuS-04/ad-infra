@@ -1,6 +1,6 @@
+import datetime
 import random
 import threading
-import datetime
 from queue import Queue
 
 from colorama import Fore, Style

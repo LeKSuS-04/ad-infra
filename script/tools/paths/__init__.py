@@ -6,7 +6,7 @@ from .chars_to_ascii_alphanum import normalize_char
 
 
 def random_string(length: int = 32, alpha: str = ascii_letters + digits):
-    return ''.join(choice(alpha) for _ in range(length))
+    return "".join(choice(alpha) for _ in range(length))
 
 
 ################# GENERAL #################
@@ -96,9 +96,9 @@ def vpn_team_server_path(team_num: int) -> Path:
     return PRIVATE_VPN_DIR / "server" / f"team{team_num:03}.conf"
 
 
-ANSIBLE_RETRY_FILES_DIR = PRIVATE_GENERATED_DIR / 'ansible_retry'
+ANSIBLE_RETRY_FILES_DIR = PRIVATE_GENERATED_DIR / "ansible_retry"
 
-DOCKER_DAEMON_CONFIG_PATH = PRIVATE_GENERATED_DIR / 'docker.json'
+DOCKER_DAEMON_CONFIG_PATH = PRIVATE_GENERATED_DIR / "docker.json"
 
 ################# RESOURCES #################
 

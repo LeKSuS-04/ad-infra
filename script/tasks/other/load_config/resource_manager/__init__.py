@@ -29,9 +29,11 @@ class ResourceManager:
             self._bastion_config = resource_config.bastion
             self._container_registry_config = resource_config.container_registry
         else:
-            self._jury_config = (
-                self._vpn_config
-            ) = self._vulnbox_config = self._bastion_config = resource_config
+            self._jury_config = resource_config
+            self._vpn_config = resource_config
+            self._vulnbox_config = resource_config
+            self._bastion_config = resource_config
+            self._container_registry_config = resource_config
 
     def get_jury_resources(self, config: LoadedConfig, teams: list[Team]) -> VMConfig:
         guesser = JuryResourceManager(self._jury_config)

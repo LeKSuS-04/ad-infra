@@ -69,7 +69,7 @@ class VMResourceManager(metaclass=ABCMeta):
 
     @abstractstaticmethod
     def _guess_cores(
-        behaviour: int | ResourceEstimationBehaviour,  # type: ignore # noqa: N805
+        behaviour: int | ResourceEstimationBehaviour,  # type: ignore
         config: LoadedConfig,
         teams: list[Team],
     ) -> int:
@@ -77,7 +77,7 @@ class VMResourceManager(metaclass=ABCMeta):
 
     @abstractstaticmethod
     def _guess_ram(
-        behaviour: int | ResourceEstimationBehaviour,  # type: ignore # noqa: N805
+        behaviour: int | ResourceEstimationBehaviour,  # type: ignore
         config: LoadedConfig,
         teams: list[Team],
     ) -> int:  # type: ignore
@@ -85,7 +85,7 @@ class VMResourceManager(metaclass=ABCMeta):
 
     @abstractstaticmethod
     def _guess_ssd(
-        behaviour: int | ResourceEstimationBehaviour,  # type: ignore # noqa: N805
+        behaviour: int | ResourceEstimationBehaviour,  # type: ignore
         config: LoadedConfig,
         teams: list[Team],
     ) -> int:  # type: ignore

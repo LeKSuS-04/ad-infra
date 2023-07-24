@@ -3,8 +3,8 @@ from tools import Resource, Syncer, log, task
 
 
 def _total_vms(config: Config) -> int:
-    # Vulnbox for each team + jury + bastion + vpn
-    return config.terraform_config.vulnbox_count + 3
+    # Vulnbox for each team + jury + bastion + vpn + container registry
+    return config.terraform_config.vulnbox_count + 4
 
 
 def _total_cores(config: Config) -> int:
@@ -12,6 +12,7 @@ def _total_cores(config: Config) -> int:
         config.terraform_config.jury_vm.cores
         + config.terraform_config.vpn_vm.cores
         + config.terraform_config.bastion_vm.cores
+        + config.terraform_config.container_registry_vm.cores
         + config.terraform_config.vulnbox_vm.cores * config.terraform_config.vulnbox_count
     )
 
@@ -21,6 +22,7 @@ def _total_ram(config: Config) -> int:
         config.terraform_config.jury_vm.ram_gb
         + config.terraform_config.vpn_vm.ram_gb
         + config.terraform_config.bastion_vm.ram_gb
+        + config.terraform_config.container_registry_vm.ram_gb
         + config.terraform_config.vulnbox_vm.ram_gb * config.terraform_config.vulnbox_count
     )
 
@@ -30,6 +32,7 @@ def _total_ssd(config: Config) -> int:
         config.terraform_config.jury_vm.ssd_gb
         + config.terraform_config.vpn_vm.ssd_gb
         + config.terraform_config.bastion_vm.ssd_gb
+        + config.terraform_config.container_registry_vm.ssd_gb
         + config.terraform_config.vulnbox_vm.ssd_gb * config.terraform_config.vulnbox_count
     )
 
