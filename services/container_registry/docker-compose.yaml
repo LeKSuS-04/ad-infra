@@ -3,10 +3,10 @@ version: '3.8'
 services:
   registry:
     image: registry:2.8.2
+    container_name: registry
     restart: unless-stopped
     ports:
       - 5000:5000
-    container_name: registry
     volumes:
       - ./cache:/var/lib/registry
       - ./registry.yaml:/etc/docker/registry/config.yml:ro
