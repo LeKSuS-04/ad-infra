@@ -2,9 +2,9 @@ from string import ascii_letters, digits
 
 _MAPPING = {
     "$": "S",
-    "-": "_",
+    "-": "-",
     "@": "a",
-    "_": "",
+    "_": "_",
     " ": "_",
     "а": "a",  # noqa: RUF001
     "б": "b",  # noqa: RUF001
@@ -28,7 +28,7 @@ _MAPPING = {
     "т": "t",
     "у": "u",  # noqa: RUF001
     "ф": "f",
-    "x": "h",
+    "х": "h",  # noqa: RUF001
     "ц": "c",
     "ч": "ch",
     "ш": "sh",
