@@ -1,6 +1,6 @@
 locals {
   shared_metadata = {
-    serial-port-enable = 0
+    serial-port-enable = 1
     user-data          = file("./cloud-init.yaml")
   }
 }
