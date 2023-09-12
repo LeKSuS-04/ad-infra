@@ -43,5 +43,5 @@ docker-pull:
 
 .PHONY: docker-clean
 docker-clean:
-	docker rmi ad-infra
-	docker volume rm ad-infra-ansible ad-infra-terraform ad-infra-internal
+	docker rmi ad-infra; :
+	docker volume rm ad-infra-ansible ad-infra-terraform ad-infra-internal; :
