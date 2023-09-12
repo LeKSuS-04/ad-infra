@@ -58,7 +58,11 @@ def pack_team_archives(
         archive_path = team_archive_path(team_name, team_num)
         archive_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with AESZipFile(archive_path, "w", compression=ZIP_LZMA, encryption=WZ_AES) as zip:
+        zip_params = {"compression": ZIP_LZMA}
+        if config.archive_password is not None:
+            zip_params["encryption"] = WZ_AES
+
+        with AESZipFile(archive_path, "w", **zip_params) as zip:
             if config.archive_password is not None:
                 zip.setpassword(config.archive_password.encode())
 
