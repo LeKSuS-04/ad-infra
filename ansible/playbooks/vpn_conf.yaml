@@ -10,7 +10,7 @@
     - name: Run OpenVPN server configs
       role: start_openvpn_server
       vars:
-        vpn_server_config_local_paths: "{{ vpn_server_files }}"
+        vpn_server_configs_local_path: "{{ vpn_server_files }}"
 
     - name: Schedule network openning
       role: schedule_network_openning

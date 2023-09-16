@@ -2,7 +2,7 @@ import threading
 
 
 class Singleton(type):
-    _instances = dict()
+    _instances = dict()  # noqa: RUF012
     _lock = threading.Lock()
 
     def __call__(cls, *args, **kwargs):

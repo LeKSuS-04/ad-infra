@@ -26,6 +26,7 @@
     - name: Install and configure docker engine
       role: install_docker
       vars:
+        daemon_config: "{{ docker_daemon_config_file }}"
         docker_users:
           - "{{ ansible_user }}"
           - "{{ hostvars[inventory_hostname].vars.username }}"

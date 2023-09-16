@@ -18,12 +18,14 @@
       - cmake
       - vim
       - nano
+      - jq
       - git
       - zip
       - unzip
       - netcat
       - net-tools
       - traceroute
+      - coreutils
     state: present
     update_cache: true
 

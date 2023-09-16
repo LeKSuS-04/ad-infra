@@ -1,8 +1,8 @@
 from pathlib import Path
-from zipfile import ZipFile
 
 from jinja2 import Environment
 from models import Config, ForcadConfig, TeamConfig, TeamTokens, VulnboxConfig
+from pyzipper import WZ_AES, ZIP_LZMA, AESZipFile
 from tools import Resource, Syncer, task
 from tools.paths import team_archive_path, vpn_team_client_path
 
@@ -42,7 +42,7 @@ def _generate_readme(
         Resource.VULNBOX_CONFIGS,
         Resource.FORCAD_CONFIG,
         Resource.TEAM_TOKENS,
-        Resource.JURY_HOST_IP,
+        Resource.JURY_HOST_PUBLIC_IP,
     ],
     creates=[Resource.TEAM_ARCHIVES_SAVED_TO_DISK],
 )
@@ -58,7 +58,14 @@ def pack_team_archives(
         archive_path = team_archive_path(team_name, team_num)
         archive_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with ZipFile(archive_path, "w") as zip:
+        zip_params = {"compression": ZIP_LZMA}
+        if config.archive_password is not None:
+            zip_params["encryption"] = WZ_AES
+
+        with AESZipFile(archive_path, "w", **zip_params) as zip:
+            if config.archive_password is not None:
+                zip.setpassword(config.archive_password.encode())
+
             readme_content = _generate_readme(
                 team_name, vulnbox, config, forcad_config, team_tokens, jury_host
             )
@@ -70,8 +77,5 @@ def pack_team_archives(
             ]
             for vpn_client in team_vpn_clients:
                 zip.write(vpn_client, Path("vpn") / vpn_client.name)
-
-            if config.archive_password is not None:
-                zip.setpassword(config.archive_password.encode())
 
     sync.set_resource(Resource.TEAM_ARCHIVES_SAVED_TO_DISK)

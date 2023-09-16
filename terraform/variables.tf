@@ -53,3 +53,13 @@ variable "bastion_vm" {
   })
   nullable = false
 }
+
+variable "container_registry_vm" {
+  description = "Resources of container registry vm"
+  type = object({
+    cores  = number
+    ram_gb = number
+    ssd_gb = number
+  })
+  nullable = false
+}

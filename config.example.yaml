@@ -14,7 +14,27 @@ yandex_cloud:
 src_dirname: ad-training-03-12-2022
 
 # Resources for virtual machines.
-virtual_machines: auto
+virtual_machines:
+  jury:
+    cores: 4
+    ram_gb: 4
+    ssd_gb: 30
+  vulnbox:
+    cores: 2
+    ram_gb: 2
+    ssd_gb: 20
+  vpn:
+    cores: 2
+    ram_gb: 2
+    ssd_gb: 10
+  bastion:
+    cores: 2
+    ram_gb: 2
+    ssd_gb: 10
+  container_registry:
+    cores: 2
+    ram_gb: 2
+    ssd_gb: 10
 
 # Credentials from various ForcAD web interfaces.
 admin:

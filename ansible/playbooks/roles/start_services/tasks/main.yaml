@@ -13,11 +13,17 @@
   become_user: "{{ owner }}"
   block:
     - name: Copy services to vulnbox
-      ansible.builtin.copy:
+      ansible.posix.synchronize:
         # '/' is appended to the path to ensure that only items inside services directories
         # (directories with services themselves) will be copied
         src: "{{ services_local_path + '/' }}"
         dest: "{{ services_remote_path }}"
+        mode: push
+        use_ssh_args: true
+        archive: true
+        compress: true
+        recursive: true
+        perms: true
 
     - name: Get names of service directories
       ansible.builtin.find:
@@ -25,8 +31,18 @@
         file_type: directory
       register: services
 
+    - name: Add docker images to registry cache
+      community.docker.docker_compose:
+        project_src: "{{ item.path }}"
+        state: present
+        build: true
+      loop: "{{ services.files }}"
+      run_once: true # Run only once to avoid same image appearing in cache multiple times
+      when: ansible_limit is not defined # Run only if this is the first run
+
     - name: Run services with docker compose
       community.docker.docker_compose:
         project_src: "{{ item.path }}"
         state: present
+        build: true
       loop: "{{ services.files }}"

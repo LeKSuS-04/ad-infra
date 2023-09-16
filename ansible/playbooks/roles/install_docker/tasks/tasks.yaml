@@ -78,6 +78,11 @@
     state: present
   loop: "{{ docker_users }}"
 
+- name: Add private container registry to list of docker mirrors
+  ansible.builtin.copy:
+    src: "{{ daemon_config }}"
+    dest: /etc/docker/daemon.json
+
 - name: Reload SSH connection to apply group changes
   ansible.builtin.meta: reset_connection
 
@@ -89,3 +94,8 @@
   loop:
     - docker.service
     - containerd.service
+
+- name: Restart docker service to apply all changes
+  ansible.builtin.systemd:
+    name: docker.service
+    state: restarted

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from tools import Resource, Syncer, log, task
 from tools.paths import (
+    ANSIBLE_CONFIG_PATH,
     ANSIBLE_INVENTORY_PATH,
     PRIVATE_GENERATED_DIR,
     PUBLIC_GENERATED_DIR,
@@ -39,6 +40,7 @@ def clean_filesystem(sync: Syncer):
     _clean_directory(PUBLIC_GENERATED_DIR)
     _clean_directory(PRIVATE_GENERATED_DIR)
 
+    _verbose_remove(ANSIBLE_CONFIG_PATH)
     _verbose_remove(ANSIBLE_INVENTORY_PATH)
 
     _verbose_remove(TERRAFORM_CONFIG_PATH)

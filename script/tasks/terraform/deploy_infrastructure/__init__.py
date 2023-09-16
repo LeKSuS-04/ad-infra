@@ -7,10 +7,12 @@ from .output_parser import save_resources
 @task(
     depends_on_boolean=[Resource.TERRAFORM_CONFIG_SAVED_TO_DISK],
     creates=[
-        Resource.VPN_HOST_IP,
-        Resource.JURY_HOST_IP,
-        Resource.VULNBOX_HOSTS_IPS,
-        Resource.BASTION_HOST_IP,
+        Resource.VPN_HOST_PUBLIC_IP,
+        Resource.JURY_HOST_PUBLIC_IP,
+        Resource.VULNBOX_HOSTS_INTERNAL_IPS,
+        Resource.BASTION_HOST_PUBLIC_IP,
+        Resource.CONTAINER_REGISTRY_HOST_PUBLIC_IP,
+        Resource.CONTAINER_REGISTRY_HOST_INTERNAL_IP,
     ],
 )
 def deploy_infrastructure(sync: Syncer):

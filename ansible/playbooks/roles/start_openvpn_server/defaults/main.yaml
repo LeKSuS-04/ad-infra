@@ -1,2 +1,2 @@
 ---
-vpn_server_config_local_paths: []
+vpn_server_config_local_paths: "/tmp"

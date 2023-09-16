@@ -1,2 +1,3 @@
 ---
 docker_users: "{{ [ ansible_user ] }}"
+daemon_config: "/dev/null"

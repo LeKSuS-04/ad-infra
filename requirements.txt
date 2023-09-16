@@ -10,8 +10,10 @@ netaddr==0.8.0
 packaging==23.1
 passlib==1.7.4
 pycparser==2.21
+pycryptodomex==3.18.0
 pydantic==1.10.8
 pyOpenSSL==23.2.0
 PyYAML==6.0
+pyzipper==0.3.6
 resolvelib==1.0.1
 typing_extensions==4.6.3

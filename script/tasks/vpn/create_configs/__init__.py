@@ -19,7 +19,7 @@ def generate_if_not_exist(config: Config, vpn_host: str):
 
 
 @task(
-    depends_on=[Resource.CONFIG, Resource.VPN_HOST_IP],
+    depends_on=[Resource.CONFIG, Resource.VPN_HOST_PUBLIC_IP],
     creates=[Resource.VPN_CONFIGS_SAVED_TO_DISK],
 )
 def create_configs(sync: Syncer, *resources):

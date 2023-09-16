@@ -24,6 +24,7 @@ class TerraformConfig(BaseModel):
     vpn_vm: VMConfig
     vulnbox_vm: VMConfig
     bastion_vm: VMConfig
+    container_registry_vm: VMConfig
 
 
 class Config(BaseModel):
