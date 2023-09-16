@@ -43,5 +43,5 @@ docker-pull:
 
 .PHONY: docker-clean
 docker-clean:
-	docker rmi ad-infra; :
-	docker volume rm ad-infra-ansible ad-infra-terraform ad-infra-internal; :
+	docker rmi ad-infra 2>/dev/null || echo "Docker image doesn't exist"
+	for volume in ad-infra-ansible ad-infra-terraform ad-infra-internal; do docker volume rm $$volume 2>/dev/null || echo "Volume $$volume doesn't exist"; done
