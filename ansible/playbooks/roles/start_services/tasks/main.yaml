@@ -32,17 +32,19 @@
       register: services
 
     - name: Add docker images to registry cache
-      community.docker.docker_compose:
-        project_src: "{{ item.path }}"
-        state: present
-        build: true
+      ansible.builtin.shell:
+        chdir: "{{ item.path }}"
+        cmd: docker compose up --build -d
+      environment:
+        DOCKER_BUILDKIT: "1"
       loop: "{{ services.files }}"
-      run_once: true # Run only once to avoid same image appearing in cache multiple times
-      when: ansible_limit is not defined # Run only if this is the first run
+      run_once: true  # Run only once to avoid same image appearing in cache multiple times
+      when: ansible_limit is not defined  # Run only if this is the first run
 
     - name: Run services with docker compose
-      community.docker.docker_compose:
-        project_src: "{{ item.path }}"
-        state: present
-        build: true
+      ansible.builtin.shell:
+        chdir: "{{ item.path }}"
+        cmd: docker compose up --build -d
+      environment:
+        DOCKER_BUILDKIT: "1"
       loop: "{{ services.files }}"

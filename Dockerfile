@@ -9,6 +9,11 @@ RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/terraform/1.4.6/terr
 RUN unzip -d /tmp -o /tmp/terraform_1.4.6_linux_amd64.zip
 RUN mv /tmp/terraform /bin/terraform
 
+# Install Packer 1.9.4
+RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/packer/1.9.4/packer_1.9.4_linux_amd64.zip
+RUN unzip -d /tmp -o /tmp/packer_1.9.4_linux_amd64.zip
+RUN mv /tmp/packer /bin/packer
+
 # Set up python
 ENV PYTHONUNBUFFERED=1
 
@@ -20,6 +25,10 @@ RUN pip install --no-cache --upgrade -r requirements.txt
 COPY --chmod=777 terraform/ ./terraform/
 ENV TF_CLI_CONFIG_FILE=/app/terraform/mirror.tfrc
 RUN terraform -chdir=./terraform init
+
+# Initialize packer
+COPY packer/ ./packer
+RUN packer init ./packer/config.pkr.hcl
 
 # Copy other source files
 COPY --chmod=755 script/ ./script/

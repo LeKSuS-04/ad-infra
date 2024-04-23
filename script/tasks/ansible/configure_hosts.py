@@ -54,6 +54,7 @@ def start_forcad(sync: Syncer):
     team_tokens: TeamTokens = dict()
     for group in teams_to_tokens:
         team, token = group.rsplit(":", maxsplit=1)
+        team = team.replace('\\"', '"')
         team_tokens[team] = token
         log(f'Received token "{token}" for team "{team}"')
 

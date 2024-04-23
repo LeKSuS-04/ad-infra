@@ -24,16 +24,6 @@
       - python3-pip
     state: present
 
-- name: Install python packages for community.docker module
-  ansible.builtin.pip:
-    name:
-      - docker==6.1.3
-      - pyyaml==5.4.1
-
-      # It's a shame that Ansible doesn't support `docker compose``
-      - docker-compose==1.29.2
-    state: present
-
 - name: Download docker GPG key
   ansible.builtin.get_url:
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"

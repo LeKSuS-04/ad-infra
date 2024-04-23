@@ -10,7 +10,7 @@ from .teams import VulnboxConfig
 class ForcadTeamConfig(BaseModel):
     name: str
     ip: IPv4Address
-    highlighted: bool | None = None
+    highlighted: bool = False
 
 
 class ForcadGameConfig(BaseModel):

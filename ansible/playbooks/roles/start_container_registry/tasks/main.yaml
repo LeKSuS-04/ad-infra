@@ -20,7 +20,8 @@
   register: registry_service
 
 - name: Run services with docker compose
-  community.docker.docker_compose:
-    project_src: "{{ service_registry_remote_path }}"
-    state: present
-    build: true
+  ansible.builtin.shell:
+    chdir: "{{ service_registry_remote_path }}"
+    cmd: docker compose up --build -d
+  environment:
+    DOCKER_BUILDKIT: "1"
