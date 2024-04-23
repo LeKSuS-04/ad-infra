@@ -1,3 +1,4 @@
+import traceback
 from collections.abc import Callable
 
 from tools.logger import log
@@ -50,6 +51,7 @@ class Task:
             return result
         except BaseException as e:
             log(f"Error in task {self.name}: {e}")
+            log(traceback.format_exc())
             log("Going to finish running tasks, all others will be skipped")
             sync.abort()
             return None

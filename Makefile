@@ -31,7 +31,7 @@ destroy:
 
 .PHONY: shell
 shell:
-	$(DOCKER_RUN) --entrypoint="/bin/bash" ad-infra
+	$(DOCKER_RUN) -u root --entrypoint="/bin/bash" ad-infra
 
 .PHONY: docker-build
 docker-build:
