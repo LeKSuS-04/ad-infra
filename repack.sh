@@ -16,9 +16,9 @@ for generated_path in $zips; do
 
     tmpdir=$(mktemp -d)
     7z x -p"$PASSWORD" -o"$tmpdir" "$generated_path"
-    cd $tmpdir
-    zip -P "$PASSWORD" -r "$filename" $(ls)
+    cd "$tmpdir"
+    zip -P "$PASSWORD" -r "$filename" "$(ls)"
     mv "$filename" "$pwd/$generated_path"
 
-    cd $pwd    
+    cd "$pwd"
 done
