@@ -1,9 +1,10 @@
 name: Build and publish Docker image
 
 on:
-  push:
-    branches:
-      - "master"
+  {}
+  # push:
+  #   branches:
+  #     - "master"
 
 jobs:
   build:
