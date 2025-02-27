@@ -1,15 +1,17 @@
-FROM python:3.10.11-bullseye
+FROM python:3.12.8-bookworm
+
+ARG TERRAFORM_VERSION=1.10.5
 
 WORKDIR /app
 
 RUN apt update -y && apt install unzip openvpn rsync -y
 
-# Install Terraform 1.4.6
-RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/terraform/1.4.6/terraform_1.4.6_linux_amd64.zip
-RUN unzip -d /tmp -o /tmp/terraform_1.4.6_linux_amd64.zip
+# Install Terraform
+RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/terraform/1.10.5/terraform_1.10.5_linux_amd64.zip
+RUN unzip -d /tmp -o /tmp/terraform_1.10.5_linux_amd64.zip
 RUN mv /tmp/terraform /bin/terraform
 
-# Install Packer 1.9.4
+# Install Packer
 RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/packer/1.9.4/packer_1.9.4_linux_amd64.zip
 RUN unzip -d /tmp -o /tmp/packer_1.9.4_linux_amd64.zip
 RUN mv /tmp/packer /bin/packer

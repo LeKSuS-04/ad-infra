@@ -2,8 +2,15 @@ variable "yandex_cloud" {
   description = "Configuration of yandex cloud provider"
   type = object({
     folder_id = string
-    iam_token = string
     zone      = string
+  })
+  nullable = false
+}
+
+variable "cloudflare" {
+  description = "Configuration of cloudflare provider"
+  type = object({
+    zone_id = string
   })
   nullable = false
 }
@@ -15,51 +22,83 @@ variable "vulnbox_count" {
 }
 
 variable "jury_vm" {
-  description = "Resources of jury vm"
+  description = "Configuration of jury vm"
   type = object({
-    cores  = number
-    ram_gb = number
-    ssd_gb = number
+    subdomain    = string
+    cores        = number
+    ram_gb       = number
+    disk_type    = string
+    disk_size_gb = number
   })
   nullable = false
 }
 
 variable "vpn_vm" {
-  description = "Resources of VPN vm"
+  description = "Configuration of VPN vm"
   type = object({
-    cores  = number
-    ram_gb = number
-    ssd_gb = number
+    subdomain      = string
+    cores          = number
+    ram_gb         = number
+    disk_type      = string
+    disk_size_gb   = number
+    wireguard_port = number
   })
   nullable = false
 }
 
 variable "vulnbox_vm" {
-  description = "Resources of vulnbox vm"
+  description = "Configuration of vulnbox vm"
   type = object({
-    cores  = number
-    ram_gb = number
-    ssd_gb = number
+    cores        = number
+    ram_gb       = number
+    disk_type    = string
+    disk_size_gb = number
   })
   nullable = false
 }
 
 variable "bastion_vm" {
-  description = "Resources of bastion vm"
+  description = "Configuration of bastion vm"
   type = object({
-    cores  = number
-    ram_gb = number
-    ssd_gb = number
+    subdomain    = string
+    cores        = number
+    ram_gb       = number
+    disk_type    = string
+    disk_size_gb = number
   })
   nullable = false
 }
 
 variable "container_registry_vm" {
-  description = "Resources of container registry vm"
+  description = "Configuration of container registry vm"
   type = object({
-    cores  = number
-    ram_gb = number
-    ssd_gb = number
+    subdomain    = string
+    cores        = number
+    ram_gb       = number
+    disk_type    = string
+    disk_size_gb = number
+  })
+  nullable = false
+}
+
+variable "monitoring_vm" {
+  description = "Configuration of monitoring vm"
+  type = object({
+    subdomain    = string
+    cores        = number
+    ram_gb       = number
+    disk_type    = string
+    disk_size_gb = number
+  })
+  nullable = false
+}
+
+variable "admin_user" {
+  description = "Configuration of admin user"
+  type = object({
+    username = string
+    password = optional(string)
+    ssh_keys = list(string)
   })
   nullable = false
 }

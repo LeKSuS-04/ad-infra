@@ -3,6 +3,10 @@ terraform {
     yandex = {
       source = "yandex-cloud/yandex"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
+    }
   }
   required_version = ">= 0.13"
 }
@@ -10,5 +14,7 @@ terraform {
 provider "yandex" {
   folder_id = var.yandex_cloud.folder_id
   zone      = var.yandex_cloud.zone
-  token     = var.yandex_cloud.iam_token
+}
+
+provider "cloudflare" {
 }
