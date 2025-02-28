@@ -1,7 +1,7 @@
 resource "yandex_compute_image" "nat-instance-ubuntu" {
-  description   = "NAT image based on Ubuntu 18.04 LTS with predefined routing and ip forwarding rules"
-  name          = "nat-instance-ubuntu-1804-lts"
-  source_family = "nat-instance-ubuntu"
+  description   = "NAT image based on Ubuntu 22.04 LTS with predefined routing and ip forwarding rules"
+  name          = "nat-instance-ubuntu-2204"
+  source_family = "nat-instance-ubuntu-2204"
 }
 
 resource "yandex_vpc_address" "bastion_ip_address" {
@@ -15,9 +15,9 @@ resource "cloudflare_dns_record" "bastion_record" {
   zone_id = var.cloudflare.zone_id
   name    = var.bastion_vm.subdomain
   type    = "A"
-  proxied = true
+  proxied = false
   content = yandex_vpc_address.bastion_ip_address.external_ipv4_address[0].address
-  ttl     = 300
+  ttl     = 1
 }
 
 resource "yandex_compute_instance" "bastion" {
@@ -55,10 +55,10 @@ resource "yandex_compute_instance" "bastion" {
 }
 
 resource "yandex_compute_instance" "vulnbox" {
-  description = "Vulnbox for team ${count.index + 1}"
-  count       = var.vulnbox_count
-  name        = format("vulnbox%03d", count.index + 1)
-  hostname    = format("vulnbox%03d", count.index + 1)
+  description = "Vulnbox for team ${var.vulnbox_numbers[count.index]}"
+  count       = length(var.vulnbox_numbers)
+  name        = format("vulnbox%03d", var.vulnbox_numbers[count.index])
+  hostname    = format("vulnbox%03d", var.vulnbox_numbers[count.index])
 
   resources {
     cores  = var.vulnbox_vm.cores
@@ -67,7 +67,7 @@ resource "yandex_compute_instance" "vulnbox" {
 
   boot_disk {
     initialize_params {
-      image_id = yandex_compute_image.ubuntu-2204-lts.id
+      image_id = yandex_compute_image.ubuntu-2404-lts.id
       type     = var.vulnbox_vm.disk_type
       size     = var.vulnbox_vm.disk_size_gb
     }

@@ -9,9 +9,9 @@ resource "cloudflare_dns_record" "container_registry_record" {
   zone_id = var.cloudflare.zone_id
   name    = var.container_registry_vm.subdomain
   type    = "A"
-  proxied = true
+  proxied = false
   content = yandex_vpc_address.container_registry_ip_address.external_ipv4_address[0].address
-  ttl     = 300
+  ttl     = 1
 }
 
 resource "yandex_compute_instance" "container-registry" {
@@ -26,7 +26,7 @@ resource "yandex_compute_instance" "container-registry" {
 
   boot_disk {
     initialize_params {
-      image_id = yandex_compute_image.ubuntu-2204-lts.id
+      image_id = yandex_compute_image.ubuntu-2404-lts.id
       type     = var.container_registry_vm.disk_type
       size     = var.container_registry_vm.disk_size_gb
     }

@@ -13,9 +13,9 @@ resource "cloudflare_dns_record" "vpn_record" {
   zone_id = var.cloudflare.zone_id
   name    = var.vpn_vm.subdomain
   type    = "A"
-  proxied = true
+  proxied = false
   content = yandex_vpc_address.vpn_ip_address.external_ipv4_address[0].address
-  ttl     = 300
+  ttl     = 1
 }
 
 # resource "yandex_vpc_security_group" "cloudflare_protected_security_group" {
@@ -43,7 +43,7 @@ resource "yandex_compute_instance" "vpn" {
 
   boot_disk {
     initialize_params {
-      image_id = yandex_compute_image.ubuntu-2204-lts.id
+      image_id = yandex_compute_image.ubuntu-2404-lts.id
       type     = var.vpn_vm.disk_type
       size     = var.vpn_vm.disk_size_gb
     }

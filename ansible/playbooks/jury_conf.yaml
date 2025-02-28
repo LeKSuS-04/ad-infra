@@ -12,7 +12,7 @@
         daemon_config: "{{ docker_daemon_config_file }}"
 
     - name: Connect to game network
-      role: connect_vpn_client
+      role: connect_wireguard_client
       vars:
         vpn_client_config_local_path: "{{ vpn_client_file }}"
 

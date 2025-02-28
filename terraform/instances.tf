@@ -34,8 +34,8 @@ locals {
   )
 }
 
-resource "yandex_compute_image" "ubuntu-2204-lts" {
+resource "yandex_compute_image" "ubuntu-2404-lts" {
   description   = "Ubuntu 24.04 LTS image"
-  name          = "ubuntu-2404-lts"
-  source_family = "ubuntu-2404-lts"
+  name          = "ubuntu-24-04-lts"
+  source_family = "ubuntu-24-04-lts"
 }

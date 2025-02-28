@@ -11,7 +11,7 @@ resource "cloudflare_dns_record" "monitoring_record" {
   type    = "A"
   proxied = true
   content = yandex_vpc_address.monitoring_ip_address.external_ipv4_address[0].address
-  ttl     = 300
+  ttl     = 1
 }
 
 resource "yandex_compute_instance" "monitoring" {
@@ -26,7 +26,7 @@ resource "yandex_compute_instance" "monitoring" {
 
   boot_disk {
     initialize_params {
-      image_id = yandex_compute_image.ubuntu-2204-lts.id
+      image_id = yandex_compute_image.ubuntu-2404-lts.id
       type     = var.monitoring_vm.disk_type
       size     = var.monitoring_vm.disk_size_gb
     }

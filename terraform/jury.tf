@@ -11,7 +11,7 @@ resource "cloudflare_dns_record" "ctfd_record" {
   type    = "A"
   proxied = true
   content = yandex_vpc_address.jury_ip_address.external_ipv4_address[0].address
-  ttl     = 300
+  ttl     = 1
 }
 
 resource "yandex_compute_instance" "jury" {
@@ -26,7 +26,7 @@ resource "yandex_compute_instance" "jury" {
 
   boot_disk {
     initialize_params {
-      image_id = yandex_compute_image.ubuntu-2204-lts.id
+      image_id = yandex_compute_image.ubuntu-2404-lts.id
       type     = var.jury_vm.disk_type
       size     = var.jury_vm.disk_size_gb
     }

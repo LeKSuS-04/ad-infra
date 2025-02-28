@@ -1,12 +1,23 @@
-version: '3.8'
-
 services:
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    cap_add: [NET_ADMIN]
+    env_file:
+      - .env
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - /data
+      - /config
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
   registry:
     image: registry:2.8.2
     container_name: registry
     restart: unless-stopped
-    ports:
-      - 5000:5000
     volumes:
       - ./cache:/var/lib/registry
       - ./registry.yaml:/etc/docker/registry/config.yml:ro

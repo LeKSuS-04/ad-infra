@@ -1,6 +1,7 @@
 # Hide all configuration files for the time being
 config.yaml
 teams.yaml
+.envrc
 
 # Hide all outputs
 generated/*
@@ -15,3 +16,4 @@ __pycache__/
 
 # VSCode
 .vscode
+.cursor

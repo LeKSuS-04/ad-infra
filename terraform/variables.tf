@@ -15,9 +15,9 @@ variable "cloudflare" {
   nullable = false
 }
 
-variable "vulnbox_count" {
-  description = "Amount of vulnboxes to create"
-  type        = number
+variable "vulnbox_numbers" {
+  description = "Indices of teams that need vulnboxes"
+  type        = list(number)
   nullable    = false
 }
 
@@ -36,12 +36,12 @@ variable "jury_vm" {
 variable "vpn_vm" {
   description = "Configuration of VPN vm"
   type = object({
-    subdomain      = string
-    cores          = number
-    ram_gb         = number
-    disk_type      = string
-    disk_size_gb   = number
-    wireguard_port = number
+    subdomain       = string
+    cores           = number
+    ram_gb          = number
+    disk_type       = string
+    disk_size_gb    = number
+    wireguard_ports = list(number)
   })
   nullable = false
 }

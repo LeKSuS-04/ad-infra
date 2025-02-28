@@ -1,50 +1,34 @@
 #!/usr/bin/env python3
 
-# Taken from https://github.com/ne-bknn/ad_net_control/blob/master/net_control.py
-# Modified a bit to fit this project better and work with newer versions of dependencies
-
 import argparse
 import logging
-import re
-import subprocess
+import traceback
 
-from helpers import (
-    DRY_RUN,
-    add_rules,
-    insert_rules,
-    list_rules,
-    logger,
-    remove_rules,
-)
+import helpers
+
+CUSTOM_CHAINS = [
+    "closed-network",
+    "open-network",
+]
+
+SETS = [
+    "same-team",
+    "team-vulnbox",
+]
 
 INIT_RULES = [
     "INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT",  # allow already established connections
+    "INPUT -m conntrack --ctstate INVALID -j DROP",  # drop invalid packets
     "INPUT -i lo -j ACCEPT",  # accept all local connections
-    "INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",  # allow icmp 8 # noqa: E501
-    "INPUT -p icmp --icmp-type 0 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",  # allow icmp 0 # noqa: E501
-    "INPUT -p udp --dport 30001:30999 -j ACCEPT",  # openvpn team servers
-    "INPUT -p udp --dport 31001:31999 -j ACCEPT",  # openvpn vulnbox servers
-    "INPUT -p udp --dport 32000 -j ACCEPT",  # openvpn jury server
-    "FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT",  # allow already established connections # noqa: E501
-    "FORWARD -i jury -o team+ -j ACCEPT",  # jury access to teams
-    "FORWARD -i jury -o vuln+ -j ACCEPT",  # jury access to vulnboxes
-    "POSTROUTING -t nat -o team+ -j MASQUERADE",  # team masquerade
-    "POSTROUTING -t nat -o vuln+ -j MASQUERADE",  # vulnboxes masquerade
-]
-
-OPEN_NETWORK_RULES = [
-    "FORWARD -i team+ -o vuln+ -j ACCEPT",  # teams can access all vulnboxes from same server
-    "FORWARD -i vuln+ -o vuln+ -j ACCEPT",  # vulnboxes can access each other on the same server
-    "FORWARD -i team+ -o eth0 -j ACCEPT",  # teams can access all other vpn servers & jury
-    "FORWARD -i vuln+ -o eth0 -j ACCEPT",  # vulnboxes can access all other vpn servers & jury
-    "FORWARD -i eth0 -o vuln+ -j ACCEPT",  # other vpn servers & jury can access vulnboxes
-    "FORWARD -i team+ -o jury -j ACCEPT",  # teams **really** can access jury at 10.10.10.10
-    "FORWARD -i vuln+ -o jury -j ACCEPT",  # vulnboxes **really** can access jury at 10.10.10.10
-]  # teams cannot access each other (not even through vulnboxes)
-
-DROP_RULES = [
-    "INPUT -j DROP",  # drop all incoming packets that are not explicitly allowed above
-    "FORWARD -j DROP",  # drop all forwarded packets that are not explicitly allowed above
+    "INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",  # allow icmp 8
+    "INPUT -p icmp --icmp-type 0 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",  # allow icmp 0
+    "INPUT -p udp --dport 30000:31999 -j ACCEPT",  # wireguard listeners
+    "INPUT -p tcp --dport 9100 -j ACCEPT",  # node_exporter metrics
+    "INPUT -p tcp --dport 9586 -j ACCEPT",  # wireguard exporter metrics
+    "FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT",  # allow already established connections
+    "FORWARD -s 10.10.10.0/24 -j ACCEPT",  # jury access to everything
+    "POSTROUTING -t nat -o wg0 -j MASQUERADE",  # everything masqueraded
+    "POSTROUTING -t mangle -o wg0 -j TTL --ttl-set 137",  # To prevent ttl filtering
 ]
 
 ALLOW_SSH_RULES = [
@@ -52,154 +36,189 @@ ALLOW_SSH_RULES = [
     "OUTPUT -p tcp --sport 22 -m state --state RELATED,ESTABLISHED -j ACCEPT",  # outgoing SSH
 ]
 
+OPEN_NETWORK_RULES = [
+    "open-network -d 10.10.10.0/24 -j ACCEPT",  # anyone can access jury
+    "open-network -d 10.80.0.0/14 -j ACCEPT",  # anyone can access vulnboxes
+]
 
-def get_isolation_rules(team):
+# forwarding traffic to closed-network chain
+CLOSED_NETWORK_FORWARDING = ["FORWARD -j closed-network"]
+
+# forwarding traffic to open-network chain
+OPEN_NETWORK_FORWARDING = ["FORWARD -j open-network"]
+
+
+# insert them first
+def get_isolation_rules(team: int):
     return [
-        f"FORWARD -o vuln{team} -j DROP",  # To be inserted after the rule -i teamN -o vulnN
+        f"FORWARD ! -s {helpers.get_team_subnet(team)} -d {helpers.get_vuln_ip(team)} -j DROP",
     ]
 
 
-def get_ban_rules(team):
+# insert them first
+def get_ban_rules(team: int):
     return [
-        f"FORWARD -i team{team} -j DROP",  # To be inserted after the rule -i teamN -o vulnN
-        f"FORWARD -i vuln{team} -j DROP",  # To be inserted after the rule -i vulnN -o teamN
+        f"FORWARD -s {helpers.get_team_subnet(team)} -j DROP",
+        f"FORWARD -s {helpers.get_vuln_ip(team)} -j DROP",
     ]
 
 
-def get_team2vuln_rules(teams_list):
-    """During closed network period, team can only access its own vulnbox (and vise versa)."""
-    return list(f"FORWARD -i team{num} -o vuln{num} -j ACCEPT" for num in teams_list) + list(
-        f"FORWARD -i vuln{num} -o team{num} -j ACCEPT" for num in teams_list
-    )
+def get_team2vuln_rules():
+    """During closed network period, team can only access its own vulnbox"""
+    return [f"closed-network -m set --match-set team-vulnbox src,dst -j ACCEPT"]
 
 
-def get_rules_list():
-    command = ["iptables", "-S"]
-    out = subprocess.check_output(command)
-    result = out.decode().split("\n")
-    result = list(
-        map(
-            lambda x: " ".join(x.split(" ")[1:]),
-            filter(lambda x: x, result),
-        )
-    )
-    return result
+def get_in_team_rules():
+    return ["FORWARD -m set --match-set same-team src,dst -j ACCEPT"]
 
 
-def add_drop_rules(*_args, **_kwargs):
-    add_rules(ALLOW_SSH_RULES)
-    add_rules(DROP_RULES)
+def init_network(args):
+    for chain in CUSTOM_CHAINS:
+        helpers.create_chain(chain)
+        helpers.set_chain_policy(chain, "DROP")
 
+    for s in SETS:
+        helpers.create_set(s)
 
-def remove_drop_rules(*_args, **_kwargs):
-    remove_rules(DROP_RULES)
-    remove_rules(ALLOW_SSH_RULES)
+    helpers.parse_arguments_teams(args)
+    helpers.add_rules(INIT_RULES)
+    helpers.add_rules(ALLOW_SSH_RULES)
+    helpers.set_chain_policy("INPUT", "DROP")
+    helpers.set_chain_policy("FORWARD", "DROP")
 
+    for team in args.teams:
+        team_subnet = helpers.get_team_subnet(team)
+        vulnbox_ip = helpers.get_vuln_ip(team)
+        helpers.add_to_set("same-team", team_subnet, team_subnet)
+        helpers.add_to_set("team-vulnbox", team_subnet, vulnbox_ip)
 
-def init_network(*, teams, **_kwargs):
-    if teams is None:
-        logger.error("Specify all required parameters: teams")
-        exit(1)
+    helpers.add_rules(get_team2vuln_rules())
+    helpers.add_rules(get_in_team_rules())
 
-    rules = INIT_RULES + get_team2vuln_rules(teams)
-    add_rules(rules)
-    add_drop_rules()
+    # just add the rules to the chain
+    helpers.add_rules(OPEN_NETWORK_RULES)
 
-    logger.info("Enabling ip forwarding")
+    close_network(args)
 
-    if not DRY_RUN:
+    helpers.logger.info("Enabling ip forwarding")
+
+    if not helpers.DRY_RUN:
         with open("/proc/sys/net/ipv4/ip_forward", "w") as f:
             f.write("1")
 
 
-def open_network(*_args, **_kwargs):
-    remove_drop_rules()
-    add_rules(OPEN_NETWORK_RULES)
-    add_drop_rules()
+def open_network(_args):
+    helpers.remove_rules(CLOSED_NETWORK_FORWARDING)
+    helpers.add_rules(OPEN_NETWORK_FORWARDING)
 
 
-def close_network(*_args, **_kwargs):
-    remove_rules(OPEN_NETWORK_RULES)
+def close_network(_args):
+    helpers.remove_rules(OPEN_NETWORK_FORWARDING)
+    helpers.add_rules(CLOSED_NETWORK_FORWARDING)
 
 
-def shutdown_network(*, teams, **_kwargs):
-    if teams is None:
-        logger.error("Specify all required parameters: teams")
-        exit(1)
+def shutdown_network(args):
+    helpers.parse_arguments_teams(args)
+    helpers.remove_rules(INIT_RULES)
 
-    remove_drop_rules()
-    all_rules = OPEN_NETWORK_RULES + INIT_RULES + get_team2vuln_rules(teams)
-    remove_rules(all_rules)
+    isolation_rules = sum((get_isolation_rules(team) for team in args.teams), [])
+    helpers.remove_rules(isolation_rules)
 
+    ban_rules = sum((get_ban_rules(team) for team in args.teams), [])
+    helpers.remove_rules(ban_rules)
 
-def ban_team(teams, team, *_args, **_kwargs):
-    if teams is None or team is None:
-        logger.error("Specify all required parameters: teams, team")
-        exit(1)
+    helpers.set_chain_policy("INPUT", "ACCEPT")
+    helpers.set_chain_policy("FORWARD", "DROP")
 
-    forward_init_rules = list(filter(lambda x: x.startswith("FORWARD"), INIT_RULES))
-    count_before = len(forward_init_rules) + len(get_team2vuln_rules(teams))
-    insert_rules(get_ban_rules(team), count_before)
+    helpers.remove_rules(ALLOW_SSH_RULES)
+    helpers.remove_rules(CLOSED_NETWORK_FORWARDING)
+    helpers.remove_rules(OPEN_NETWORK_FORWARDING)
 
+    for chain in CUSTOM_CHAINS:
+        helpers.remove_chain(chain)
 
-def isolate_team(teams, team, *_args, **_kwargs):
-    if teams is None or team is None:
-        logger.error("Specify all required parameters: teams, team")
-        exit(1)
-
-    forward_init_rules = list(filter(lambda x: x.startswith("FORWARD"), INIT_RULES))
-    count_before = len(forward_init_rules) + len(get_team2vuln_rules(teams))
-    insert_rules(get_isolation_rules(team), count_before)
+    for s in SETS:
+        helpers.remove_set(s)
 
 
-COMMANDS = {
-    "init": init_network,
-    "open": open_network,
-    "close": close_network,
-    "shutdown": shutdown_network,
-    "add_drop": add_drop_rules,
-    "remove_drop": remove_drop_rules,
-    "list": list_rules,
-    "ban": ban_team,
-    "isolate": isolate_team,
-}
+def ban_team(args):
+    helpers.insert_rules(get_ban_rules(args.team), 1)
+
+
+def unban_team(args):
+    helpers.remove_rules(get_ban_rules(args.team))
+
+
+def isolate_team(args):
+    helpers.insert_rules(get_isolation_rules(args.team), 1)
+
+
+def deisolate_team(args):
+    helpers.remove_rules(get_isolation_rules(args.team))
+
+
+def add_teams_arguments(command_parser):
+    teams_group = command_parser.add_mutually_exclusive_group(required=True)
+    teams_group.add_argument("--teams", "-t", type=int, metavar="N", help="Team count")
+    teams_group.add_argument("--range", type=str, metavar="N-N", help="Range of teams (inclusive)")
+    teams_group.add_argument("--list", type=str, metavar="N,N,...", help="List of teams")
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Manage router network during AD CTF")
-    parser.add_argument("command", choices=COMMANDS.keys(), help="Command to run")
-    parser.add_argument(
-        "--team", type=int, metavar="N", help="Team number (1-indexed) for ban or isolation"
-    )
+    parser = argparse.ArgumentParser(description="Manage network during AD CTF")
     parser.add_argument("--verbose", "-v", help="Turn verbose logging on", action="store_true")
     parser.add_argument("--dry-run", help="Just print rules (verbose mode)", action="store_true")
 
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--teams", "-t", type=int, metavar="N", help="Team count")
-    group.add_argument("--range", type=str, metavar="N-N", help="Range of teams (inclusive)")
-    group.add_argument("--list", type=str, metavar="N,N,...", help="List of teams")
+    subparsers = parser.add_subparsers()
 
-    args = parser.parse_args()
+    init_parser = subparsers.add_parser("init", help="Bootstrap the network")
+    init_parser.set_defaults(func=init_network)
+    add_teams_arguments(init_parser)
 
-    if args.teams:
-        parsed_teams = range(1, args.teams + 1)
-    elif args.range:
-        match = re.search(r"(\d+)-(\d+)", args.range)
-        if not match:
-            print("Invalid range")
-            exit(1)
+    open_parser = subparsers.add_parser("open", help="Open the network")
+    open_parser.set_defaults(func=open_network)
 
-        parsed_teams = range(int(match.group(1)), int(match.group(2)) + 1)
+    close_parser = subparsers.add_parser("close", help="Close the network")
+    close_parser.set_defaults(func=close_network)
+
+    shutdown_parser = subparsers.add_parser("shutdown", help="Remove all the added rules")
+    shutdown_parser.set_defaults(func=shutdown_network)
+    add_teams_arguments(shutdown_parser)
+
+    list_parser = subparsers.add_parser("list", help="List added rules")
+    list_parser.set_defaults(func=helpers.list_rules)
+
+    ban_parser = subparsers.add_parser("ban", help="Ban the team")
+    ban_parser.set_defaults(func=ban_team)
+    ban_parser.add_argument("--team", type=int, metavar="N", help="Team number for ban")
+
+    unban_parser = subparsers.add_parser("unban", help="Unban the team")
+    unban_parser.set_defaults(func=unban_team)
+    unban_parser.add_argument("--team", type=int, metavar="N", help="Team number for unban")
+
+    isolate_parser = subparsers.add_parser("isolate", help="Isolate the team")
+    isolate_parser.set_defaults(func=isolate_team)
+    isolate_parser.add_argument("--team", type=int, metavar="N", help="Team number for isolation")
+
+    deisolate_parser = subparsers.add_parser("deisolate", help="Deisolate the team")
+    deisolate_parser.set_defaults(func=deisolate_team)
+    deisolate_parser.add_argument(
+        "--team", type=int, metavar="N", help="Team number for deisolation"
+    )
+
+    parsed = parser.parse_args()
+
+    if parsed.verbose or parsed.dry_run:
+        helpers.logger.setLevel(logging.DEBUG)
     else:
-        parsed_teams = list(map(int, args.list.split(",")))
+        helpers.logger.setLevel(logging.INFO)
 
-    args.teams = parsed_teams
+    if parsed.dry_run:
+        helpers.DRY_RUN = True
 
-    if args.verbose or args.dry_run:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-
-    if args.dry_run:
-        DRY_RUN = True  # noqa: F811
-
-    COMMANDS[args.command](**vars(args))
+    try:
+        parsed.func(parsed)
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"Got an exception: {e}\n{tb}")
+        exit(1)

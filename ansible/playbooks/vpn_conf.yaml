@@ -7,10 +7,8 @@
     - name: Disable unattended-upgrades service
       role: disable_unattended_upgrades
 
-    - name: Run OpenVPN server configs
-      role: start_openvpn_server
-      vars:
-        vpn_server_configs_local_path: "{{ vpn_server_files }}"
+    - name: Run WireGuard server configs
+      role: start_wireguard_server
 
     - name: Schedule network openning
       role: schedule_network_openning

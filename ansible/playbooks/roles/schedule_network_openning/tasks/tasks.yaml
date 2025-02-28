@@ -5,6 +5,7 @@
       - python3
       - python3-pip
       - iptables-persistent
+      - ipset
       - at
     state: present
     update_cache: true
@@ -26,8 +27,8 @@
 
 - name: Schedule network openning using `at`
   custom.at:
-    command: "/ad_net_control/net_control.py open --teams {{ team_count }}"
-    exact_time: "{{ network_open_time.strftime('%Y%m%d%H%M.%S') }}"
+    command: "/ad_net_control/net_control.py open"
+    exact_time: "{{ network_open_time }}"
     unique: true
   environment:
     TZ: "{{ timezone }}"

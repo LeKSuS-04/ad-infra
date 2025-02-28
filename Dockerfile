@@ -4,7 +4,7 @@ ARG TERRAFORM_VERSION=1.10.5
 
 WORKDIR /app
 
-RUN apt update -y && apt install unzip openvpn rsync -y
+RUN apt update -y && apt install unzip wireguard-tools rsync -y
 
 # Install Terraform
 RUN wget -P /tmp https://hashicorp-releases.yandexcloud.net/terraform/1.10.5/terraform_1.10.5_linux_amd64.zip

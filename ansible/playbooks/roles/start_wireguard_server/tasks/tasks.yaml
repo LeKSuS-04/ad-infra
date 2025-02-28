@@ -1,0 +1,43 @@
+---
+- name: Install WireGuard package
+  ansible.builtin.apt:
+    pkg:
+      - wireguard
+      - wireguard-tools
+    state: present
+    update_cache: true
+
+- name: Ensure directory for config files exists
+  ansible.builtin.file:
+    path: /etc/wireguard
+    state: directory
+    mode: "0700"
+
+- name: Synchronize WireGuard configs
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/wireguard"
+  loop: "{{ vpn_server_files }}"
+
+- name: Get paths to WireGuard configs
+  ansible.builtin.find:
+    path: /etc/wireguard
+    file_type: file
+    pattern: "*.conf"
+    recurse: true
+  register: found_wireguard_configs
+
+- name: Enable IP forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable WireGuard service to start on boot
+  ansible.builtin.systemd:
+    name: "wg-quick@{{ item.path | basename | regex_replace('\\.conf$', '') }}"
+    enabled: true
+    state: started
+  loop: "{{ found_wireguard_configs.files }}"

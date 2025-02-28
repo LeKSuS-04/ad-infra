@@ -32,7 +32,7 @@
           - "{{ hostvars[inventory_hostname].vars.username }}"
 
     - name: Connect to the game network
-      role: connect_vpn_client
+      role: connect_wireguard_client
       vars:
         vpn_client_config_local_path: "{{ hostvars[inventory_hostname].vars.vpn_client_file }}"
 
