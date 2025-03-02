@@ -19,15 +19,15 @@
 
 - name: Make script file executable
   ansible.builtin.file:
-    path: /ad_net_control/net_control.py
+    path: /ad_net_control/wg_control.py
     mode: 0755
 
 - name: Initialize network
-  ansible.builtin.command: "/ad_net_control/net_control.py init --teams {{ team_count }}"
+  ansible.builtin.command: "/ad_net_control/wg_control.py init --teams {{ team_count }}"
 
 - name: Schedule network openning using `at`
   custom.at:
-    command: "/ad_net_control/net_control.py open"
+    command: "/ad_net_control/wg_control.py open"
     exact_time: "{{ network_open_time }}"
     unique: true
   environment:

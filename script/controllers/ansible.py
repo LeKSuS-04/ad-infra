@@ -1,15 +1,20 @@
 import json
 import os
+import random
 import re
+import string
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
+from config import Config
+from controllers.terraform import TerraformOutput
+from controllers.wireguard import VpnInfo
 from util.log import get_logger
 from util.paths import REPOSITORY_ROOT
-from util.process import run_process
+from util.process import ExecutionResult, run_process
 
 
 @dataclass
@@ -48,14 +53,14 @@ class AnsibleController:
         self.retries_path = Path(tempfile.gettempdir()) / "ad-infra-ansible-retries"
         self.retries_path.mkdir(exist_ok=True, parents=True)
 
-        self.logger = get_logger("ansible-controller")
+        self._logger = get_logger("ansible-controller")
 
     def run_playbook(
         self,
         playbook: Path,
         variables: dict[str, Any] | None = None,
         max_retries: int = 1,
-    ):
+    ) -> ExecutionResult:
         args = ["ansible-playbook", str(playbook), "-i", str(self.inventory_path)]
         if variables:
             json_args = json.dumps(variables)
@@ -66,12 +71,12 @@ class AnsibleController:
         exception = None
         while not has_succeeded and retries < max_retries:
             try:
-                self.logger.info(f"Running playbook {playbook}")
+                self._logger.info(f"Running playbook {playbook}")
                 result = self._run_ansible_command(args)
                 has_succeeded = True
             except Exception as e:
                 retries += 1
-                self.logger.warning(f"Playbook {playbook} failed: {e}")
+                self._logger.warning(f"Playbook {playbook} failed: {e}")
 
                 if "--limit" not in args:
                     playbook_name = playbook.stem
@@ -83,7 +88,7 @@ class AnsibleController:
                 exception = e
 
         if not has_succeeded and exception:
-            self.logger.error(f"Playbook {playbook} failed after {retries} retries")
+            self._logger.error(f"Playbook {playbook} failed after {retries} retries")
             raise exception
 
         return result
@@ -103,25 +108,93 @@ class AnsibleController:
         }
         for host, address in all_hosts.items():
             if address not in active_hosts:
-                self.logger.info(f"{host} is down :(")
+                self._logger.info(f"{host} is down :(")
                 all_up = False
             else:
-                self.logger.info(f"{host} is up!")
+                self._logger.info(f"{host} is up!")
 
         vulnboxes_down = 0
         vulnboxes_up = 0
         for vulnbox in inventory.vulnbox_info:
             if vulnbox.internal_address not in active_hosts:
-                self.logger.debug(f"{vulnbox.internal_address} is down :(")
+                self._logger.debug(f"{vulnbox.internal_address} is down :(")
                 vulnboxes_down += 1
                 all_up = False
             else:
-                self.logger.debug(f"{vulnbox.internal_address} is up!")
+                self._logger.debug(f"{vulnbox.internal_address} is up!")
                 vulnboxes_up += 1
 
-        self.logger.info(f"Vulnboxes: {vulnboxes_up} up, {vulnboxes_down} down")
+        self._logger.info(f"Vulnboxes: {vulnboxes_up} up, {vulnboxes_down} down")
 
         return all_up
+
+    def create_or_restore_inventory(
+        self,
+        config: Config,
+        vpn_info: VpnInfo,
+        tf_output: TerraformOutput,
+    ) -> Inventory:
+        def create_inventory():
+            vulnbox_infos = []
+            for vulnbox in tf_output.addresses.internal.vulnboxes:
+                vulnbox_vpn = vpn_info.team_configs[vulnbox.number]
+                self._logger.info(f"Vulnbox {vulnbox.number} has ip {vulnbox.ip}")
+                vulnbox_infos.append(
+                    VulnboxInfo(
+                        internal_address=vulnbox.ip,
+                        team_username=f"team{vulnbox.number:03}",
+                        team_password="".join(
+                            random.choices(string.ascii_letters + string.digits, k=32)
+                        ),
+                        vpn_client_file=vulnbox_vpn.base_path / vulnbox_vpn.vulnbox_filename,
+                    )
+                )
+
+            inventory = Inventory(
+                admin_user=config.infra.ssh.username,
+                admin_ssh_key_path=config.infra.ssh.private_key_path,
+                bastion_address=tf_output.addresses.open.bastion,
+                vpn_address=tf_output.addresses.open.vpn,
+                container_registry_address=tf_output.addresses.open.container_registry,
+                monitoring_address=tf_output.addresses.open.monitoring,
+                jury_address=tf_output.addresses.open.jury,
+                vulnbox_info=vulnbox_infos,
+            )
+            return inventory
+
+        if not self.inventory_path.exists():
+            return create_inventory()
+
+        inventory_dict = yaml.safe_load(self.inventory_path.read_text())
+        vulnbox_hosts = inventory_dict["all"]["children"]["virtualmachines"]["children"]["hosts"]
+        vulnbox_infos = []
+        for host, info in vulnbox_hosts.items():
+            vars = info["vars"]
+            vulnbox_infos.append(
+                VulnboxInfo(
+                    internal_address=host,
+                    team_username=vars["username"],
+                    team_password=vars["password"],
+                    vpn_client_file=vars["vpn_client_file"],
+                )
+            )
+
+        inventory_addresses = set(host for host in vulnbox_hosts.keys())
+        tf_addresses = set(vulnbox.ip for vulnbox in tf_output.addresses.internal.vulnboxes)
+
+        if inventory_addresses != tf_addresses:
+            return create_inventory()
+
+        return Inventory(
+            admin_user=config.infra.ssh.username,
+            admin_ssh_key_path=config.infra.ssh.private_key_path,
+            bastion_address=tf_output.addresses.open.bastion,
+            vpn_address=tf_output.addresses.open.vpn,
+            container_registry_address=tf_output.addresses.open.container_registry,
+            monitoring_address=tf_output.addresses.open.monitoring,
+            jury_address=tf_output.addresses.open.jury,
+            vulnbox_info=vulnbox_infos,
+        )
 
     def save_inventory(self, inventory: Inventory):
         proxy_command = (
@@ -186,9 +259,9 @@ class AnsibleController:
         }
 
         self.inventory_path.write_text(yaml.dump(inventory_dict))
-        self.logger.info(f"Inventory saved to {self.inventory_path}")
+        self._logger.info(f"Inventory saved to {self.inventory_path}")
 
-    def _run_ansible_command(self, command: list[str], check: bool = True):
+    def _run_ansible_command(self, command: list[str], check: bool = True) -> ExecutionResult:
         env = os.environ.copy()
         env["ANSIBLE_CONFIG"] = str(self.ansible_cfg_path)
         env["ANSIBLE_INVENTORY"] = str(self.inventory_path)

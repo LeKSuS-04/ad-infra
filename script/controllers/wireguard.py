@@ -179,9 +179,10 @@ class TeamConfigs:
 
 
 @dataclass
-class ConfigPaths:
-    server_configs: list[Path]
+class VpnInfo:
+    server_config_paths: list[Path]
     team_configs: list[TeamConfigs]
+    jury_config_path: Path
 
 
 class WireguardController:
@@ -197,7 +198,8 @@ class WireguardController:
         self._team_port = team_port
         self._jury_port = jury_port
 
-        self._jury_address = "10.10.10.10"
+        self._jury_group = 2
+
         self._jury_subnet = "10.10.10.0/24"
         self._team_subnet = "10.60.0.0/14"
         self._vulnbox_subnet = "10.80.0.0/14"
@@ -216,7 +218,7 @@ class WireguardController:
         team_output_dir: Path,
         jury_output_path: Path,
         get_team_dir_name: Callable[[int], str],
-    ) -> ConfigPaths:
+    ) -> VpnInfo:
         self._logger.info(f"Generating wireguard configs for {total_teams} teams")
 
         def exists_not_empty(path: Path) -> bool:
@@ -227,8 +229,10 @@ class WireguardController:
             return any(path.iterdir())
 
         team_nums = list(range(total_teams))
-        if exists_not_empty(server_output_dir) and all(
-            exists_not_empty(team_output_dir / get_team_dir_name(i)) for i in team_nums
+        if (
+            exists_not_empty(server_output_dir)
+            and jury_output_path.exists()
+            and all(exists_not_empty(team_output_dir / get_team_dir_name(i)) for i in team_nums)
         ):
             self._logger.info("Wireguard configs already exist, skipping generation")
             return self._discover_configs(
@@ -236,6 +240,7 @@ class WireguardController:
                 server_output_dir=server_output_dir,
                 team_output_dir=team_output_dir,
                 get_team_dir_name=get_team_dir_name,
+                jury_output_path=jury_output_path,
             )
 
         # Create directories if they don't exist
@@ -253,7 +258,6 @@ class WireguardController:
         team_gen = self._get_generator(
             subnet=self._team_subnet,
             server_number=0,
-            server_host=self._server_address,
             server_port=self._team_port,
             groups=team_nums,
             per_group=per_team,
@@ -264,26 +268,19 @@ class WireguardController:
         vulnbox_gen = self._get_generator(
             subnet=self._vulnbox_subnet,
             server_number=1,
-            server_host=self._server_address,
             server_port=self._vulnbox_port,
             groups=team_nums,
             per_group=1,
             group_name=self._vulnbox_group_name,
         )
 
-        jury_gen = self._get_generator(
-            subnet=self._jury_subnet,
-            server_number=2,
-            server_host=self._server_address,
-            server_port=self._jury_port,
-            groups=[0],
-            per_group=1,
-            group_name=self._jury_group_name,
-        )
+        self._logger.info("Generating jury config")
+        jury_gen = self._get_jury_generator()
 
         named_generators = {
             "team": team_gen,
             "vuln": vulnbox_gen,
+            "jury": jury_gen,
         }
 
         self._logger.info("Dumping server configs")
@@ -315,21 +312,28 @@ class WireguardController:
                 )
             )
 
+        self._logger.info("Dumping jury config")
+        jury_path = jury_output_path
+        jury_path.write_text(jury_gen.peer_configs[self._jury_group][0].dumps())
+
         self._logger.info("Done")
-        return ConfigPaths(server_configs=server_configs, team_configs=team_configs)
+        return VpnInfo(
+            server_config_paths=server_configs,
+            team_configs=team_configs,
+            jury_config_path=jury_path,
+        )
 
     def _get_generator(
         self,
         subnet: str,
         server_number: int,
-        server_host: str,
         server_port: int,
         groups: list[int],
         per_group: int,
         group_name: str,
     ) -> WGGenerator:
         return WGGenerator(
-            server=server_host,
+            server=self._server_address,
             server_number=server_number,
             server_port=server_port,
             per_group=per_group,
@@ -347,13 +351,34 @@ class WireguardController:
             group_name=group_name,
         )
 
+    def _get_jury_generator(self) -> WGGenerator:
+        return WGGenerator(
+            server=self._server_address,
+            server_number=2,
+            server_port=self._jury_port,
+            group_list=[self._jury_group],
+            per_group=1,
+            group_name=self._jury_group_name,
+            single_peer=True,
+            subnet="10.10.10.0/24",
+            subnet_newbits=6,
+            routed_subnets=",".join(
+                [
+                    self._jury_subnet,
+                    self._team_subnet,
+                    self._vulnbox_subnet,
+                ]
+            ),
+        )
+
     def _discover_configs(
         self,
         total_teams: int,
         server_output_dir: Path,
         team_output_dir: Path,
+        jury_output_path: Path,
         get_team_dir_name: Callable[[int], str],
-    ) -> ConfigPaths:
+    ) -> VpnInfo:
         server_configs = list(server_output_dir.glob("*.conf"))
         team_configs = []
         for team_dir in map(team_output_dir.joinpath, map(get_team_dir_name, range(total_teams))):
@@ -370,4 +395,8 @@ class WireguardController:
                         vulnbox_address=extract_vulnbox_address(team_dir / vulnbox_filename),
                     )
                 )
-        return ConfigPaths(server_configs=server_configs, team_configs=team_configs)
+        return VpnInfo(
+            server_config_paths=server_configs,
+            team_configs=team_configs,
+            jury_config_path=jury_output_path,
+        )

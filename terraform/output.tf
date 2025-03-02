@@ -12,7 +12,10 @@ output "addresses" {
       "monitoring" : yandex_vpc_address.monitoring_ip_address.external_ipv4_address[0].address,
     },
     "internal" : {
-      "vulnboxes" : [for instance in yandex_compute_instance.vulnbox : instance.network_interface.0.ip_address]
+      "vulnboxes" : [for i, instance in zipmap(var.vulnbox_numbers, yandex_compute_instance.vulnbox) : {
+        "number" : i,
+        "ip" : instance.network_interface.0.ip_address
+      }]
     }
   }
 }

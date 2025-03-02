@@ -21,8 +21,14 @@ class OpenAddresses:
 
 
 @dataclass
+class Vulnbox:
+    number: int
+    ip: str
+
+
+@dataclass
 class InternalAddresses:
-    vulnboxes: list[str]
+    vulnboxes: list[Vulnbox]
 
 
 @dataclass
@@ -59,7 +65,12 @@ class TerraformController:
             addresses=Addresses(
                 protected=ProtectedAddresses(**addresses["protected"]),
                 open=OpenAddresses(**addresses["open"]),
-                internal=InternalAddresses(**addresses["internal"]),
+                internal=InternalAddresses(
+                    vulnboxes=[
+                        Vulnbox(number=int(v["number"]), ip=v["ip"])
+                        for v in addresses["internal"]["vulnboxes"]
+                    ]
+                ),
             )
         )
 

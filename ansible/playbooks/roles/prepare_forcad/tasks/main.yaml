@@ -14,7 +14,7 @@
   block:
     - name: Ensure unzip is installed
       ansible.builtin.apt:
-        pkg: unzip=6.0-26ubuntu3.1
+        pkg: unzip
         state: present
         update_cache: true
 
@@ -54,6 +54,7 @@
   block:
     - name: Install requirements for ForcAD cli
       ansible.builtin.pip:
+        break_system_packages: true
         requirements: "{{ [forcad_dir, 'cli', 'requirements.txt'] | path_join }}"
 
     - name: Setup ForcAD

@@ -16,7 +16,7 @@
       - git
       - zip
       - unzip
-      - netcat
+      - netcat-openbsd
       - net-tools
       - traceroute
       - coreutils
@@ -68,10 +68,13 @@
 
 - name: Edit sshd config to allow ssh authentication with password
   ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
+    path: "{{ item }}"
     regexp: "^PasswordAuthentication no$"
     line: "PasswordAuthentication yes"
     backrefs: yes
+  loop:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d/50-cloud-init.conf
   register: sshd_config
 
 - name: Reload sshd service

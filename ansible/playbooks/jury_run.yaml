@@ -4,5 +4,3 @@
   roles:
     - name: Start ForcAD
       role: start_forcad
-      vars:
-        checkers_local_path: "{{ checkers_path }}"

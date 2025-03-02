@@ -41,17 +41,19 @@ def run_process(
             else:
                 stderr_lines.append(line)
 
+    current_thread = threading.current_thread().name
+
     stdout_thread = threading.Thread(
         target=log_output,
         args=(process.stdout, True),
         daemon=True,
-        name="stdout",
+        name=f"{current_thread}-stdout",
     )
     stderr_thread = threading.Thread(
         target=log_output,
         args=(process.stderr, False),
         daemon=True,
-        name="stderr",
+        name=f"{current_thread}-stderr",
     )
 
     stdout_thread.start()

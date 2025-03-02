@@ -15,5 +15,5 @@
     - name: Set up container registry
       role: start_container_registry
       vars:
-        service_registry_local_path: "{{ hostvars[inventory_hostname].service_registry_local_path }}"
+        service_registry_local_path: "{{ registry_path }}"
         service_registry_remote_path: /registry

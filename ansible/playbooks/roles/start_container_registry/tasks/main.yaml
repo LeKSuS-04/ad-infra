@@ -19,6 +19,13 @@
     perms: true
   register: registry_service
 
+- name: Create environment file
+  copy:
+    dest: "{{ service_registry_remote_path }}/.env"
+    content: |
+      DOMAIN={{ domain }}
+    mode: "0644"
+
 - name: Run services with docker compose
   ansible.builtin.shell:
     chdir: "{{ service_registry_remote_path }}"
