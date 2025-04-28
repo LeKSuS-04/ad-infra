@@ -22,19 +22,22 @@ class OpenAddresses:
 
 @dataclass
 class Vulnbox:
-    number: int
     ip: str
 
 
 @dataclass
 class InternalAddresses:
-    vulnboxes: list[Vulnbox]
+    # Team number -> Vulnbox
+    vulnboxes: dict[int, Vulnbox]
 
 
 @dataclass
 class Addresses:
+    # Protected by cloudflare
     protected: ProtectedAddresses
+    # Open to the internet
     open: OpenAddresses
+    # Internal, accessible only from within the cloud subnet
     internal: InternalAddresses
 
 
@@ -66,10 +69,10 @@ class TerraformController:
                 protected=ProtectedAddresses(**addresses["protected"]),
                 open=OpenAddresses(**addresses["open"]),
                 internal=InternalAddresses(
-                    vulnboxes=[
-                        Vulnbox(number=int(v["number"]), ip=v["ip"])
+                    vulnboxes={
+                        int(v["number"]): Vulnbox(ip=v["ip"])
                         for v in addresses["internal"]["vulnboxes"]
-                    ]
+                    }
                 ),
             )
         )

@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 class ExceptionThread(threading.Thread):
     def __init__(self, target: Callable, *args, **kwargs):
+        self.exception = None
         super().__init__(target=target, *args, **kwargs)
 
     def run(self):

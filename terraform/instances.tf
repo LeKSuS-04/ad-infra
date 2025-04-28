@@ -1,16 +1,16 @@
 locals {
-
+  user_config = {
+    name : var.admin_user.username
+    groups : "sudo"
+    shell : "/bin/bash"
+    hashed_passwd : var.admin_user.password == null ? null : bcrypt(var.admin_user.password)
+    lock_passwd : var.admin_user.password == null,
+    sudo : "ALL=(ALL) NOPASSWD:ALL"
+    ssh_authorized_keys : var.admin_user.ssh_keys
+  }
   cloud_init_config_map = {
     users : [
-      {
-        name : var.admin_user.username
-        groups : "sudo"
-        shell : "/bin/bash"
-        hashed_passwd : var.admin_user.password == null ? null : bcrypt(var.admin_user.password)
-        lock_passwd : var.admin_user.password == null,
-        sudo : ["ALL=(ALL) NOPASSWD:ALL"]
-        ssh_authorized_keys : var.admin_user.ssh_keys
-      }
+      { for k, v in local.user_config : k => v if v != null }
     ]
     ssh_pwauth : var.admin_user.password != null
   }

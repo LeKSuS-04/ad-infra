@@ -5,12 +5,12 @@ import time
 from pathlib import Path
 
 import click
-from config import load_config
+from config import Config, load_config
 from controllers.ansible import AnsibleController
 from controllers.forcad import ForcadController
 from controllers.team_archive import InstanceInfo, TeamArchiveController, TeamInfo
-from controllers.terraform import TerraformController
-from controllers.wireguard import WireguardController
+from controllers.terraform import TerraformController, TerraformOutput
+from controllers.wireguard import VpnInfo, WireguardController
 from util.exc_thread import ExceptionThread
 from util.log import get_logger
 from util.paths import REPOSITORY_ROOT
@@ -49,24 +49,24 @@ def deploy(infra: Path, teams: Path, from_scratch: bool):
         destroy_impl()
 
     config = load_config(infra, teams)
-    generated = REPOSITORY_ROOT / "generated"
+    generated_path = REPOSITORY_ROOT / "generated"
 
-    tf_output, vpn_info = setup_infrastructure(config, generated)
+    tf_output, vpn_info = setup_infrastructure(config, generated_path)
 
     forcad_config_path, docker_daemon_config_file = configure_services(
-        config, vpn_info, tf_output, generated
+        config, vpn_info, tf_output, generated_path
     )
 
     team_tokens = deploy_and_configure_hosts(
         config, vpn_info, tf_output, forcad_config_path, docker_daemon_config_file
     )
 
-    create_team_archives(config, vpn_info, tf_output, team_tokens, generated)
+    create_team_archives(config, vpn_info, tf_output, team_tokens, generated_path)
 
     logger.info("All done!")
 
 
-def setup_infrastructure(config, generated):
+def setup_infrastructure(config: Config, generated_path: Path) -> tuple[TerraformOutput, VpnInfo]:
     vulnbox_port = 30000
     team_port = 31000
     jury_port = 31789
@@ -89,22 +89,24 @@ def setup_infrastructure(config, generated):
     vpn_info = wireguard.generate_configs(
         total_teams=team_count,
         per_team=config.infra.teams.players_per_team,
-        server_output_dir=generated / "server",
-        team_output_dir=generated / "teams",
-        jury_output_path=generated / "jury.conf",
+        server_output_dir=generated_path / "server",
+        team_output_dir=generated_path / "teams",
+        jury_output_path=generated_path / "jury.conf",
         get_team_dir_name=lambda x: f"team{x:03}",
     )
 
     return tf_output, vpn_info
 
 
-def configure_services(config, vpn_info, tf_output, generated):
-    forcad_config_path = generated / "forcad.yaml"
+def configure_services(
+    config: Config, vpn_info: VpnInfo, tf_output: TerraformOutput, generated_path: Path
+) -> tuple[Path, Path]:
+    forcad_config_path = generated_path / "forcad.yaml"
     forcad_controller = ForcadController()
     forcad_controller.save_forcad_config(config, vpn_info, forcad_config_path)
 
     registry_address = tf_output.addresses.open.container_registry.replace("registry", "containers")
-    docker_daemon_config_file = generated / "docker-daemon.json"
+    docker_daemon_config_file = generated_path / "docker-daemon.json"
     daemon_config = {
         "registry-mirrors": [
             f"https://{registry_address}",
@@ -116,10 +118,15 @@ def configure_services(config, vpn_info, tf_output, generated):
 
 
 def deploy_and_configure_hosts(
-    config, vpn_info, tf_output, forcad_config_path, docker_daemon_config_file
-):
+    config: Config,
+    vpn_info: VpnInfo,
+    tf_output: TerraformOutput,
+    forcad_config_path: Path,
+    docker_daemon_config_file: Path,
+) -> dict[str, str]:
     ansible = AnsibleController()
     inventory = ansible.create_or_restore_inventory(config, vpn_info, tf_output)
+    ansible.save_inventory(inventory)
 
     all_hosts_up = ansible.ping(inventory)
     while not all_hosts_up:
@@ -159,7 +166,12 @@ def deploy_and_configure_hosts(
 
 
 def configure_jury_and_vulnboxes(
-    config, vpn_info, forcad_config_path, docker_daemon_config_file, playbooks_path, ansible
+    config: Config,
+    vpn_info: VpnInfo,
+    forcad_config_path: Path,
+    docker_daemon_config_file: Path,
+    playbooks_path: Path,
+    ansible: AnsibleController,
 ):
     def run_configure_jury_playbook():
         ansible.run_playbook(
@@ -195,7 +207,7 @@ def configure_jury_and_vulnboxes(
         t.join()
 
 
-def run_jury_and_get_tokens(playbooks_path, ansible):
+def run_jury_and_get_tokens(playbooks_path: Path, ansible: AnsibleController) -> dict[str, str]:
     result = ansible.run_playbook(
         playbooks_path / "jury_run.yaml",
         max_retries=3,
@@ -215,8 +227,14 @@ def run_jury_and_get_tokens(playbooks_path, ansible):
     return team_tokens
 
 
-def create_team_archives(config, vpn_info, tf_output, team_tokens, generated):
-    archives = generated / "archives"
+def create_team_archives(
+    config: Config,
+    vpn_info: VpnInfo,
+    tf_output: TerraformOutput,
+    team_tokens: dict[str, str],
+    generated_path: Path,
+):
+    archives = generated_path / "archives"
     archives.mkdir(parents=True, exist_ok=True)
     team_archive_controller = TeamArchiveController()
 
@@ -224,14 +242,10 @@ def create_team_archives(config, vpn_info, tf_output, team_tokens, generated):
     inventory = ansible.create_or_restore_inventory(config, vpn_info, tf_output)
 
     for i, team in enumerate(config.teams.teams):
-        instance = None
-        for vulnbox, info in zip(tf_output.addresses.internal.vulnboxes, inventory.vulnbox_info):
-            if vulnbox.number == i:
-                instance = InstanceInfo(
-                    username=info.team_username,
-                    password=info.team_password,
-                )
-                break
+        instance = InstanceInfo(
+            username=inventory.vulnbox_info[i].team_username,
+            password=inventory.vulnbox_info[i].team_password,
+        )
 
         team_info = TeamInfo(
             number=i,
@@ -240,7 +254,7 @@ def create_team_archives(config, vpn_info, tf_output, team_tokens, generated):
             instance=instance,
             game_address=vpn_info.team_configs[i].vulnbox_address,
         )
-        team_dir = generated / "teams" / f"team{i:03}"
+        team_dir = generated_path / "teams" / f"team{i:03}"
 
         archive_path = archives / f"team{i:03}.zip"
         team_archive_controller.create_archive(
@@ -257,8 +271,8 @@ def destroy_impl():
     terraform = TerraformController()
     terraform.destroy()
 
-    generated = REPOSITORY_ROOT / "generated"
-    for entry in generated.iterdir():
+    generated_path = REPOSITORY_ROOT / "generated"
+    for entry in generated_path.iterdir():
         if entry.name != ".keep":
             logger.info(f"Removing {entry}")
             if entry.is_file():

@@ -36,7 +36,8 @@ class Inventory:
     container_registry_address: str
     monitoring_address: str
 
-    vulnbox_info: list[VulnboxInfo]
+    # Team number -> Vulnbox info
+    vulnbox_info: dict[int, VulnboxInfo]
 
 
 def _get_active_hosts_from_output(ansible_output: str) -> set[str]:
@@ -115,7 +116,7 @@ class AnsibleController:
 
         vulnboxes_down = 0
         vulnboxes_up = 0
-        for vulnbox in inventory.vulnbox_info:
+        for vulnbox in inventory.vulnbox_info.values():
             if vulnbox.internal_address not in active_hosts:
                 self._logger.debug(f"{vulnbox.internal_address} is down :(")
                 vulnboxes_down += 1
@@ -135,19 +136,17 @@ class AnsibleController:
         tf_output: TerraformOutput,
     ) -> Inventory:
         def create_inventory():
-            vulnbox_infos = []
-            for vulnbox in tf_output.addresses.internal.vulnboxes:
-                vulnbox_vpn = vpn_info.team_configs[vulnbox.number]
-                self._logger.info(f"Vulnbox {vulnbox.number} has ip {vulnbox.ip}")
-                vulnbox_infos.append(
-                    VulnboxInfo(
-                        internal_address=vulnbox.ip,
-                        team_username=f"team{vulnbox.number:03}",
-                        team_password="".join(
-                            random.choices(string.ascii_letters + string.digits, k=32)
-                        ),
-                        vpn_client_file=vulnbox_vpn.base_path / vulnbox_vpn.vulnbox_filename,
-                    )
+            vulnbox_infos = {}
+            for number, vulnbox in tf_output.addresses.internal.vulnboxes.items():
+                vulnbox_vpn = vpn_info.team_configs[number]
+                self._logger.info(f"Vulnbox {number} has ip {vulnbox.ip}")
+                vulnbox_infos[number] = VulnboxInfo(
+                    internal_address=vulnbox.ip,
+                    team_username=f"team{number:03}",
+                    team_password="".join(
+                        random.choices(string.ascii_letters + string.digits, k=32)
+                    ),
+                    vpn_client_file=vulnbox_vpn.base_path / vulnbox_vpn.vulnbox_filename,
                 )
 
             inventory = Inventory(
@@ -166,21 +165,22 @@ class AnsibleController:
             return create_inventory()
 
         inventory_dict = yaml.safe_load(self.inventory_path.read_text())
-        vulnbox_hosts = inventory_dict["all"]["children"]["virtualmachines"]["children"]["hosts"]
-        vulnbox_infos = []
+        vulnboxes = inventory_dict["all"]["children"]["virtualmachines"]["children"]["vulnboxes"]
+        vulnbox_hosts = vulnboxes["hosts"]
+        vulnbox_infos = {}
         for host, info in vulnbox_hosts.items():
             vars = info["vars"]
-            vulnbox_infos.append(
-                VulnboxInfo(
-                    internal_address=host,
-                    team_username=vars["username"],
-                    team_password=vars["password"],
-                    vpn_client_file=vars["vpn_client_file"],
-                )
+            vulnbox_infos[vars["team_number"]] = VulnboxInfo(
+                internal_address=host,
+                team_username=vars["username"],
+                team_password=vars["password"],
+                vpn_client_file=vars["vpn_client_file"],
             )
 
         inventory_addresses = set(host for host in vulnbox_hosts.keys())
-        tf_addresses = set(vulnbox.ip for vulnbox in tf_output.addresses.internal.vulnboxes)
+        tf_addresses = set(
+            vulnbox.ip for vulnbox in tf_output.addresses.internal.vulnboxes.values()
+        )
 
         if inventory_addresses != tf_addresses:
             return create_inventory()
@@ -209,12 +209,13 @@ class AnsibleController:
                 "hosts": {
                     v.internal_address: {
                         "vars": {
+                            "team_number": k,
                             "username": v.team_username,
                             "password": v.team_password,
                             "vpn_client_file": str(v.vpn_client_file),
                         },
                     }
-                    for v in inventory.vulnbox_info
+                    for k, v in inventory.vulnbox_info.items()
                 },
             },
             "vpn": {
