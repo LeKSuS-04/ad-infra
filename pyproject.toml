@@ -1,6 +1,19 @@
+[project]
+name = "ad-infra"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "click>=8.2.1",
+    "jinja2>=3.1.6",
+    "netaddr>=1.3.0",
+    "pydantic>=2.11.7",
+]
+
 [tool.black]
 line-length = 100
-target-version = ["py312"]
+target-version = ["py313"]
 
 [tool.ruff]
 select = [
@@ -22,4 +35,4 @@ ignore = [
 
 # Same as Black.
 line-length = 100
-target-version = "py312"
+target-version = "py313"

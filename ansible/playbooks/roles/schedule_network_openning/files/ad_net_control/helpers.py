@@ -185,3 +185,10 @@ def parse_arguments_teams(args):
         parsed_teams = list(map(int, args.list.split(",")))
 
     args.teams = parsed_teams
+
+
+def set_sysctl(key, value):
+    path = f"/proc/sys/{key.replace('.', '/')}"
+    logger.debug(f"Setting sysctl {key} (path: {path}) to {value}")
+    with open(path, "w") as f:
+        f.write(str(value))

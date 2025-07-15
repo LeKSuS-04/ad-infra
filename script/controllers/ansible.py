@@ -138,7 +138,7 @@ class AnsibleController:
         def create_inventory():
             vulnbox_infos = {}
             for number, vulnbox in tf_output.addresses.internal.vulnboxes.items():
-                vulnbox_vpn = vpn_info.team_configs[number]
+                vulnbox_vpn = vpn_info.team_vpn_infos[number]
                 self._logger.info(f"Vulnbox {number} has ip {vulnbox.ip}")
                 vulnbox_infos[number] = VulnboxInfo(
                     internal_address=vulnbox.ip,
@@ -146,7 +146,7 @@ class AnsibleController:
                     team_password="".join(
                         random.choices(string.ascii_letters + string.digits, k=32)
                     ),
-                    vpn_client_file=vulnbox_vpn.base_path / vulnbox_vpn.vulnbox_filename,
+                    vpn_client_file=vulnbox_vpn.vpn_configs_path / vulnbox_vpn.vulnbox_filename,
                 )
 
             inventory = Inventory(

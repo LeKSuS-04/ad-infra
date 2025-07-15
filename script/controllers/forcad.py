@@ -27,7 +27,7 @@ class ForcadController:
                     "ip": team_config.vulnbox_address,
                     "highlighted": team.highlighted,
                 }
-                for team, team_config in zip(config.teams.teams, vpn_info.team_configs)
+                for team, team_config in zip(config.teams.teams, vpn_info.team_vpn_infos)
             ],
             "admin": {
                 "username": config.infra.forcad.admin_creds.username,

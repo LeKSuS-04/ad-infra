@@ -15,6 +15,12 @@ from util.exc_thread import ExceptionThread
 from util.log import get_logger
 from util.paths import REPOSITORY_ROOT
 
+from ansible.playbooks.roles.schedule_network_openning.files.ad_net_control.config import (
+    InfraHost,
+    NetworkConfig,
+    TeamGroup,
+)
+
 logger = get_logger("cli")
 
 
@@ -53,12 +59,17 @@ def deploy(infra: Path, teams: Path, from_scratch: bool):
 
     tf_output, vpn_info = setup_infrastructure(config, generated_path)
 
-    forcad_config_path, docker_daemon_config_file = configure_services(
+    forcad_config_path, network_config_path, docker_daemon_config_path = configure_services(
         config, vpn_info, tf_output, generated_path
     )
 
     team_tokens = deploy_and_configure_hosts(
-        config, vpn_info, tf_output, forcad_config_path, docker_daemon_config_file
+        config,
+        vpn_info,
+        tf_output,
+        forcad_config_path,
+        network_config_path,
+        docker_daemon_config_path,
     )
 
     create_team_archives(config, vpn_info, tf_output, team_tokens, generated_path)
@@ -69,20 +80,21 @@ def deploy(infra: Path, teams: Path, from_scratch: bool):
 def setup_infrastructure(config: Config, generated_path: Path) -> tuple[TerraformOutput, VpnInfo]:
     vulnbox_port = 30000
     team_port = 31000
-    jury_port = 31789
+    infra_port = 31789
 
     logger.info("Deploying infrastructure")
     terraform = TerraformController()
-    terraform.save_config(config, [vulnbox_port, team_port, jury_port])
+    terraform.save_config(config, [vulnbox_port, team_port, infra_port])
     terraform.apply()
     tf_output = terraform.output()
     logger.info(f"Got Terraform output: {tf_output}")
 
     wireguard = WireguardController(
         server_address=tf_output.addresses.open.vpn,
+        config=config.infra.vpn,
+        infra_port=infra_port,
         vulnbox_port=vulnbox_port,
         team_port=team_port,
-        jury_port=jury_port,
     )
 
     team_count = len(config.teams.teams)
@@ -91,6 +103,7 @@ def setup_infrastructure(config: Config, generated_path: Path) -> tuple[Terrafor
         per_team=config.infra.teams.players_per_team,
         server_output_dir=generated_path / "server",
         team_output_dir=generated_path / "teams",
+        infra_output_dir=generated_path / "infra",
         jury_output_path=generated_path / "jury.conf",
         get_team_dir_name=lambda x: f"team{x:03}",
     )
@@ -100,7 +113,7 @@ def setup_infrastructure(config: Config, generated_path: Path) -> tuple[Terrafor
 
 def configure_services(
     config: Config, vpn_info: VpnInfo, tf_output: TerraformOutput, generated_path: Path
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, Path]:
     forcad_config_path = generated_path / "forcad.yaml"
     forcad_controller = ForcadController()
     forcad_controller.save_forcad_config(config, vpn_info, forcad_config_path)
@@ -114,7 +127,34 @@ def configure_services(
     }
     docker_daemon_config_file.write_text(json.dumps(daemon_config, indent=2))
 
-    return forcad_config_path, docker_daemon_config_file
+    infra_hosts = [
+        InfraHost(ip=config.infra.vpn.jury_ip, always_open=True),
+    ]
+    if config.infra.vpn.extra_services is not None:
+        infra_hosts.extend(
+            InfraHost(ip=srv.ip, always_open=srv.always_open)
+            for srv in config.infra.vpn.extra_services.values()
+        )
+
+    network_config = NetworkConfig(
+        wireguard_ports=vpn_info.server_ports,
+        extra_tcp_ports=[],
+        extra_udp_ports=[],
+        interface_names=vpn_info.server_interface_names,
+        infra_hosts=infra_hosts,
+        vulnbox_subnet=vpn_info.vulnbox_subnet,
+        teams=[
+            TeamGroup(
+                vulnbox_ip=vpn_info.team_vpn_infos[i].vulnbox_address,
+                team_subnet=vpn_info.team_vpn_infos[i].vpn_configs_path.name,
+            )
+            for i in range(len(vpn_info.team_vpn_infos))
+        ],
+    )
+    network_config_path = generated_path / "network.json"
+    network_config_path.write_text(json.dumps(network_config.to_dict(), indent=2))
+
+    return forcad_config_path, network_config_path, docker_daemon_config_file
 
 
 def deploy_and_configure_hosts(
@@ -122,7 +162,8 @@ def deploy_and_configure_hosts(
     vpn_info: VpnInfo,
     tf_output: TerraformOutput,
     forcad_config_path: Path,
-    docker_daemon_config_file: Path,
+    network_config_path: Path,
+    docker_daemon_config_path: Path,
 ) -> dict[str, str]:
     ansible = AnsibleController()
     inventory = ansible.create_or_restore_inventory(config, vpn_info, tf_output)
@@ -143,6 +184,7 @@ def deploy_and_configure_hosts(
             "team_count": len(config.teams.teams),
             "timezone": config.infra.forcad.game.timezone,
             "network_open_time": config.infra.forcad.game.start_time.strftime("%Y%m%d%H%M.%S"),
+            "ad_net_control_config_local_path": str(network_config_path),
         },
         max_retries=3,
     )
@@ -152,14 +194,14 @@ def deploy_and_configure_hosts(
         playbooks_path / "container_registry_conf.yaml",
         variables={
             "domain": tf_output.addresses.open.container_registry.replace("registry", "containers"),
-            "docker_daemon_config_file": str(docker_daemon_config_file),
+            "docker_daemon_config_file": str(docker_daemon_config_path),
             "registry_path": str(services_path / "container_registry"),
         },
         max_retries=3,
     )
 
     configure_jury_and_vulnboxes(
-        config, vpn_info, forcad_config_path, docker_daemon_config_file, playbooks_path, ansible
+        config, vpn_info, forcad_config_path, docker_daemon_config_path, playbooks_path, ansible
     )
 
     return run_jury_and_get_tokens(playbooks_path, ansible)
@@ -252,7 +294,7 @@ def create_team_archives(
             name=team.name,
             token=team_tokens[team.name],
             instance=instance,
-            game_address=vpn_info.team_configs[i].vulnbox_address,
+            game_address=vpn_info.team_vpn_infos[i].vulnbox_address,
         )
         team_dir = generated_path / "teams" / f"team{i:03}"
 

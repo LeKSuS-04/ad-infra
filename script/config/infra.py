@@ -83,11 +83,22 @@ class TeamsConfig(BaseModel):
     readme_template: str
 
 
+class ExtraServiceConfig(BaseModel):
+    ip: str
+    always_open: bool
+
+
+class VpnConfig(BaseModel):
+    jury_ip: str = "10.10.10.10"
+    extra_services: dict[str, ExtraServiceConfig] | None = None
+
+
 class InfraConfig(BaseModel):
     yandex_cloud: YandexCloudConfig
     cloudflare: CloudflareConfig
     ssh: SshConfig
     resources: ResourcesPerVMConfig
     repository: RepositoryConfig
+    vpn: VpnConfig
     forcad: ForcadConfig
     teams: TeamsConfig

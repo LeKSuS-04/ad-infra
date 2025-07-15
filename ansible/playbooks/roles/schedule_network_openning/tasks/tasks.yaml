@@ -17,17 +17,24 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 
+- name: Copy ad_net_control config to remote
+  ansible.builtin.copy:
+    src: "{{ ad_net_control_config_local_path }}"
+    dest: /network.json
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
 - name: Make script file executable
   ansible.builtin.file:
-    path: /ad_net_control/wg_control.py
+    path: /ad_net_control/control.py
     mode: 0755
 
 - name: Initialize network
-  ansible.builtin.command: "/ad_net_control/wg_control.py init --teams {{ team_count }}"
+  ansible.builtin.command: "/ad_net_control/control.py -c /network.json init"
 
 - name: Schedule network openning using `at`
   custom.at:
-    command: "/ad_net_control/wg_control.py open"
+    command: "/ad_net_control/control.py -c /network.json open"
     exact_time: "{{ network_open_time }}"
     unique: true
   environment:
