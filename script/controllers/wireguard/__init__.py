@@ -60,6 +60,7 @@ class WireguardController:
         self._bits_per_group = 8
         self._teams_subnet = IPNetwork("10.60.0.0/14")
         self._vulnbox_subnet = IPNetwork("10.80.0.0/14")
+        self._infra_server_address = IPNetwork("10.0.0.1/32")
         self._jury_name = "jury"
         self._infra_subnets = {
             "jury": IPNetwork(f"{config.jury_ip}/32"),
@@ -142,11 +143,11 @@ class WireguardController:
 
         self._logger.info("Generating vulnbox configs")
         vulnbox_configs = generate_group_network(
-            group_name=self._team_group_name,
-            subnet=IPNetwork(self._teams_subnet),
+            group_name=self._vulnbox_group_name,
+            subnet=IPNetwork(self._vulnbox_subnet),
             routed_subnets=routed_subnets,
             server_host=self._server_address,
-            server_port=self._team_port,
+            server_port=self._vulnbox_port,
             groups=team_nums,
             bits_per_group=self._bits_per_group,
             peers_per_group=1,
@@ -157,7 +158,7 @@ class WireguardController:
         infra_configs = generate_const_network(
             server_host=self._server_address,
             server_port=self._infra_port,
-            server_vpn_address=self._infra_subnets["jury"],
+            server_vpn_address=self._infra_server_address,
             peer_addresses={name: subnet for name, subnet in self._infra_subnets.items()},
             routed_subnets=routed_subnets,
         )

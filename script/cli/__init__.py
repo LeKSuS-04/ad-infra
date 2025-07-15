@@ -6,6 +6,11 @@ from pathlib import Path
 
 import click
 from config import Config, load_config
+from config.ad_net_control import (
+    InfraHost,
+    NetworkConfig,
+    TeamGroup,
+)
 from controllers.ansible import AnsibleController
 from controllers.forcad import ForcadController
 from controllers.team_archive import InstanceInfo, TeamArchiveController, TeamInfo
@@ -14,12 +19,6 @@ from controllers.wireguard import VpnInfo, WireguardController
 from util.exc_thread import ExceptionThread
 from util.log import get_logger
 from util.paths import REPOSITORY_ROOT
-
-from ansible.playbooks.roles.schedule_network_openning.files.ad_net_control.config import (
-    InfraHost,
-    NetworkConfig,
-    TeamGroup,
-)
 
 logger = get_logger("cli")
 
@@ -146,7 +145,7 @@ def configure_services(
         teams=[
             TeamGroup(
                 vulnbox_ip=vpn_info.team_vpn_infos[i].vulnbox_address,
-                team_subnet=vpn_info.team_vpn_infos[i].vpn_configs_path.name,
+                team_subnet=vpn_info.team_vpn_infos[i].team_subnet,
             )
             for i in range(len(vpn_info.team_vpn_infos))
         ],

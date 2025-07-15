@@ -86,7 +86,7 @@ def generate_const_network[T](
             ConfigSection(
                 name="Interface",
                 values={
-                    "Address": str(server_vpn_address[1]),
+                    "Address": str(server_vpn_address[0]),
                     "PrivateKey": server_key.private,
                     "ListenPort": server_port,
                 },
