@@ -6,6 +6,9 @@
     - name: Disable unattended-upgrades service
       role: disable_unattended_upgrades
 
+    - name: Fill hosts entries
+      role: fill_hosts_entries
+
     - name: Install docker engine
       role: install_docker
       vars:

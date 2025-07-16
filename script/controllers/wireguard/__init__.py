@@ -126,7 +126,12 @@ class WireguardController:
         for path in [tmp_teams_path, tmp_vulnbox_path]:
             path.mkdir(parents=True, exist_ok=True)
 
-        routed_subnets = [self._teams_subnet, self._vulnbox_subnet, *self._infra_subnets.values()]
+        routed_subnets = [
+            self._teams_subnet,
+            self._vulnbox_subnet,
+            self._infra_server_address,
+            *self._infra_subnets.values(),
+        ]
 
         self._logger.info("Generating team configs")
         team_configs = generate_group_network(

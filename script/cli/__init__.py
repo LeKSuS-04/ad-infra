@@ -89,7 +89,7 @@ def setup_infrastructure(config: Config, generated_path: Path) -> tuple[Terrafor
     logger.info(f"Got Terraform output: {tf_output}")
 
     wireguard = WireguardController(
-        server_address=tf_output.addresses.open.vpn,
+        server_address=tf_output.addresses.open.vpn.dns,
         config=config.infra.vpn,
         infra_port=infra_port,
         vulnbox_port=vulnbox_port,
@@ -117,7 +117,7 @@ def configure_services(
     forcad_controller = ForcadController()
     forcad_controller.save_forcad_config(config, vpn_info, forcad_config_path)
 
-    registry_address = tf_output.addresses.open.container_registry.replace("registry", "containers")
+    registry_address = tf_output.addresses.open.container_registry.dns
     docker_daemon_config_file = generated_path / "docker-daemon.json"
     daemon_config = {
         "registry-mirrors": [
@@ -192,7 +192,7 @@ def deploy_and_configure_hosts(
     ansible.run_playbook(
         playbooks_path / "container_registry_conf.yaml",
         variables={
-            "domain": tf_output.addresses.open.container_registry.replace("registry", "containers"),
+            "domain": tf_output.addresses.open.container_registry.dns,
             "docker_daemon_config_file": str(docker_daemon_config_path),
             "registry_path": str(services_path / "container_registry"),
         },
@@ -283,10 +283,12 @@ def create_team_archives(
     inventory = ansible.create_or_restore_inventory(config, vpn_info, tf_output)
 
     for i, team in enumerate(config.teams.teams):
-        instance = InstanceInfo(
-            username=inventory.vulnbox_info[i].team_username,
-            password=inventory.vulnbox_info[i].team_password,
-        )
+        instance = None
+        if i in inventory.vulnbox_info:
+            instance = InstanceInfo(
+                username=inventory.vulnbox_info[i].team_username,
+                password=inventory.vulnbox_info[i].team_password,
+            )
 
         team_info = TeamInfo(
             number=i,

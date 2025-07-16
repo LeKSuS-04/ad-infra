@@ -7,6 +7,9 @@
     - name: Disable unattended-upgrades service
       role: disable_unattended_upgrades
 
+    - name: Fill hosts entries
+      role: fill_hosts_entries
+
     # This step is required because this playbook switches to `team` user
     # while configuring vulnbox. That means that SSH connection and command
     # execution are both done by unprivileged users. Installing ACL (namely,

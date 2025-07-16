@@ -60,7 +60,9 @@ class WGConfig:
         self.sections.append(section)
 
     def dumps(self):
-        return "\n\n".join(s.dumps() for s in self.sections)
+        sections = "\n\n".join(s.dumps() for s in self.sections)
+        values = "\n".join(f"{k} = {v}" for k, v in self.values.items())
+        return sections + "\n\n" + values + "\n"
 
 
 @dataclass
@@ -104,9 +106,11 @@ def generate_const_network[T](
                     "PublicKey": peer_key.public,
                     "AllowedIPs": str(peer_address),
                 },
-                comment=f"friendly_name = {peer_key}",
+                comment=f"friendly_name = {peer_id}",
             )
         )
+
+        import random
 
         peer_configs[peer_id] = WGConfig(
             sections=[
@@ -115,6 +119,7 @@ def generate_const_network[T](
                     values={
                         "Address": str(peer_address[0]),
                         "PrivateKey": peer_key.private,
+                        "ListenPort": random.randint(30000, 30000 + 1000),
                     },
                 ),
                 ConfigSection(
@@ -157,8 +162,13 @@ def generate_group_network[T](
     peers_per_group: int,
     peer_offset: int,
 ) -> GroupConfigs[T]:
-    assert peer_offset + peers_per_group <= 254, "not enough bits for peers within group"
-    assert 24 - subnet.prefixlen > ceil(log2(len(groups) + 2)), "not enough bits for all groups"
+    requested_peer_bits = ceil(log2(peer_offset + peers_per_group))
+    actual_peer_bits = bits_per_group
+    assert requested_peer_bits <= actual_peer_bits, "not enough bits for peers within group"
+
+    required_group_bits = ceil(log2(len(groups) + 2))
+    actual_group_bits = 32 - bits_per_group - subnet.prefixlen
+    assert required_group_bits <= actual_group_bits, "not enough bits for all groups"
 
     server_key = WGKey.generate()
     server_config = WGConfig(
@@ -175,7 +185,7 @@ def generate_group_network[T](
     )
 
     peer_configs: dict[T, Group] = {}
-    group_subnets = skip_n(subnet.subnet(24), 1)
+    group_subnets = subnet.subnet(32 - bits_per_group)
     for group_id, group_subnet in zip(groups, group_subnets):
         peer_subnets = skip_n(group_subnet.subnet(32), 1 + peer_offset)
         peers = []

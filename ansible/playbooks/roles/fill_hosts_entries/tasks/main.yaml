@@ -1,0 +1,12 @@
+---
+- name: Ensure /etc/hosts contains correct DNS entries
+  become: true
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.* {{ item.key }}$'
+    line: "{{ item.value }} {{ item.key }}"
+    state: present
+    create: yes
+  loop: "{{ dns_entries | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

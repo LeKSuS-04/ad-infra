@@ -2,6 +2,8 @@
 
 import argparse
 import json
+import logging
+import traceback
 
 import helpers
 from config import NetworkConfig, TeamGroup
@@ -161,6 +163,7 @@ def add_team_argument(parser: argparse.ArgumentParser):
 
 def main():
     parser = argparse.ArgumentParser(description="Manage network during AD CTF")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--config", "-c", type=str, required=True, help="Path to the config file")
 
     subparsers = parser.add_subparsers()
@@ -186,6 +189,16 @@ def main():
     with open(args.config) as f:
         global CONFIG
         CONFIG = NetworkConfig.from_dict(json.load(f))
+
+    if args.verbose:
+        helpers.logger.setLevel(logging.DEBUG)
+
+    try:
+        args.func(args)
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"Got an exception: {e}\n{tb}")
+        exit(1)
 
 
 if __name__ == "__main__":

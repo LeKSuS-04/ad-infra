@@ -5,3 +5,16 @@
     name: unattended-upgrades.service
     enabled: false
     state: stopped
+
+- name: Stop any running unattended-upgrade process
+  become: true
+  ansible.builtin.shell:
+    executable: /bin/bash
+    cmd: |
+      pids=$(pgrep -f unattended-upgrade | grep -v "$$");
+      if [ -n "$pids" ]; then
+        kill -9 $pids;
+      fi
+  register: kill_unattended_upgrade
+  changed_when: kill_unattended_upgrade.rc == 0
+  failed_when: false

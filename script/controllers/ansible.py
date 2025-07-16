@@ -36,6 +36,8 @@ class Inventory:
     container_registry_address: str
     monitoring_address: str
 
+    dns_entries: dict[str, str]
+
     # Team number -> Vulnbox info
     vulnbox_info: dict[int, VulnboxInfo]
 
@@ -149,14 +151,21 @@ class AnsibleController:
                     vpn_client_file=vulnbox_vpn.vpn_configs_path / vulnbox_vpn.vulnbox_filename,
                 )
 
+            addrs = tf_output.addresses.open
+            host_entries = {
+                addrs.vpn.dns: addrs.vpn.raw,
+                addrs.container_registry.dns: addrs.container_registry.raw,
+            }
+
             inventory = Inventory(
                 admin_user=config.infra.ssh.username,
                 admin_ssh_key_path=config.infra.ssh.private_key_path,
-                bastion_address=tf_output.addresses.open.bastion,
-                vpn_address=tf_output.addresses.open.vpn,
-                container_registry_address=tf_output.addresses.open.container_registry,
-                monitoring_address=tf_output.addresses.open.monitoring,
-                jury_address=tf_output.addresses.open.jury,
+                bastion_address=addrs.bastion.raw,
+                vpn_address=addrs.vpn.raw,
+                container_registry_address=addrs.container_registry.raw,
+                monitoring_address=addrs.monitoring.raw,
+                jury_address=addrs.jury.raw,
+                dns_entries=host_entries,
                 vulnbox_info=vulnbox_infos,
             )
             return inventory
@@ -177,6 +186,9 @@ class AnsibleController:
                 vpn_client_file=vars["vpn_client_file"],
             )
 
+        vars = inventory_dict["all"]["children"]["virtualmachines"]["vars"]
+        dns_entries = vars["dns_entries"]
+
         inventory_addresses = set(host for host in vulnbox_hosts.keys())
         tf_addresses = set(
             vulnbox.ip for vulnbox in tf_output.addresses.internal.vulnboxes.values()
@@ -188,11 +200,12 @@ class AnsibleController:
         return Inventory(
             admin_user=config.infra.ssh.username,
             admin_ssh_key_path=config.infra.ssh.private_key_path,
-            bastion_address=tf_output.addresses.open.bastion,
-            vpn_address=tf_output.addresses.open.vpn,
-            container_registry_address=tf_output.addresses.open.container_registry,
-            monitoring_address=tf_output.addresses.open.monitoring,
-            jury_address=tf_output.addresses.open.jury,
+            bastion_address=tf_output.addresses.open.bastion.raw,
+            vpn_address=tf_output.addresses.open.vpn.dns,
+            container_registry_address=tf_output.addresses.open.container_registry.dns,
+            monitoring_address=tf_output.addresses.open.monitoring.raw,
+            jury_address=tf_output.addresses.open.jury.raw,
+            dns_entries=dns_entries,
             vulnbox_info=vulnbox_infos,
         )
 
@@ -252,6 +265,7 @@ class AnsibleController:
                         "vars": {
                             "ansible_user": inventory.admin_user,
                             "ansible_ssh_private_key_file": str(inventory.admin_ssh_key_path),
+                            "dns_entries": inventory.dns_entries,
                         },
                         "children": host_info,
                     }

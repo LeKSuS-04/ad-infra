@@ -12,12 +12,23 @@ class ProtectedAddresses:
 
 
 @dataclass
+class OnlyRawAddress:
+    raw: str
+
+
+@dataclass
+class RawAndDnsAddress:
+    raw: str
+    dns: str
+
+
+@dataclass
 class OpenAddresses:
-    vpn: str
-    bastion: str
-    jury: str
-    container_registry: str
-    monitoring: str
+    vpn: RawAndDnsAddress
+    bastion: RawAndDnsAddress
+    jury: OnlyRawAddress
+    container_registry: RawAndDnsAddress
+    monitoring: OnlyRawAddress
 
 
 @dataclass
@@ -47,13 +58,15 @@ class TerraformOutput:
 
 
 class TerraformController:
+    PARALLELISM = 10
+
     def __init__(self):
         self.terraform_dir = REPOSITORY_ROOT / "terraform"
         self.terraform_config_path = self.terraform_dir / "variables.auto.tfvars.json"
 
     def apply(self):
         run_process(
-            ["terraform", "apply", "-auto-approve"],
+            ["terraform", "apply", "-auto-approve", f"-parallelism={self.PARALLELISM}"],
             cwd=self.terraform_dir,
         )
 
@@ -67,7 +80,13 @@ class TerraformController:
         return TerraformOutput(
             addresses=Addresses(
                 protected=ProtectedAddresses(**addresses["protected"]),
-                open=OpenAddresses(**addresses["open"]),
+                open=OpenAddresses(
+                    vpn=RawAndDnsAddress(**addresses["open"]["vpn"]),
+                    bastion=RawAndDnsAddress(**addresses["open"]["bastion"]),
+                    jury=OnlyRawAddress(**addresses["open"]["jury"]),
+                    container_registry=RawAndDnsAddress(**addresses["open"]["container_registry"]),
+                    monitoring=OnlyRawAddress(**addresses["open"]["monitoring"]),
+                ),
                 internal=InternalAddresses(
                     vulnboxes={
                         int(v["number"]): Vulnbox(ip=v["ip"])
@@ -79,7 +98,7 @@ class TerraformController:
 
     def destroy(self):
         run_process(
-            ["terraform", "destroy", "-auto-approve"],
+            ["terraform", "destroy", "-auto-approve", f"-parallelism={self.PARALLELISM}"],
             cwd=self.terraform_dir,
         )
 
