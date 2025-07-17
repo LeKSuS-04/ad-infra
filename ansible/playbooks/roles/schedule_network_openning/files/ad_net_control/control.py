@@ -11,13 +11,12 @@ from config import NetworkConfig, TeamGroup
 CONFIG: NetworkConfig
 
 SAME_TEAM_SET = "same-team"
-TEAM_VULNBOX_SET = "team-vulnbox"
 
 CLOSED_NET_CHAIN = "closed-network"
 OPEN_NET_CHAIN = "open-network"
 
-CLOSED_NETWORK_FORWARDING = ["FORWARD -j closed-network"]
-OPEN_NETWORK_FORWARDING = ["FORWARD -j open-network"]
+CLOSED_NETWORK_FORWARDING = [f"FORWARD -j {CLOSED_NET_CHAIN}"]
+OPEN_NETWORK_FORWARDING = [f"FORWARD -j {OPEN_NET_CHAIN}"]
 
 
 def get_init_rules():
@@ -57,7 +56,7 @@ def get_init_rules():
     # Allow access to always-open infra hosts for everyone.
     for host in CONFIG.infra_hosts:
         if host.always_open:
-            rules.append(f"FORWARD -s {host.ip} -j ACCEPT")
+            rules.append(f"FORWARD -d {host.ip} -j ACCEPT")
 
     # Always allow traffic from within the same team.
     rules.append(f"FORWARD -m set --match-set {SAME_TEAM_SET} src,dst -j ACCEPT")
@@ -96,11 +95,12 @@ def configure_sysctl():
 
 
 def init_network(args):
+    configure_sysctl()
+
     for chain in [CLOSED_NET_CHAIN, OPEN_NET_CHAIN]:
         helpers.create_chain(chain)
-        helpers.set_chain_policy(chain, "DROP")
 
-    for s in [SAME_TEAM_SET, TEAM_VULNBOX_SET]:
+    for s in [SAME_TEAM_SET]:
         helpers.create_set(s)
 
     init_rules = get_init_rules()
@@ -110,9 +110,22 @@ def init_network(args):
 
     for team in CONFIG.teams:
         helpers.add_to_set(SAME_TEAM_SET, team.team_subnet, team.team_subnet)
-        helpers.add_to_set(TEAM_VULNBOX_SET, team.team_subnet, team.vulnbox_ip)
+        helpers.add_to_set(SAME_TEAM_SET, team.team_subnet, team.vulnbox_ip)
+        helpers.add_to_set(SAME_TEAM_SET, team.vulnbox_ip, team.team_subnet)
+        helpers.add_to_set(SAME_TEAM_SET, team.vulnbox_ip, team.vulnbox_ip)
 
     close_network(args)
+
+
+def reset_network(args):
+    helpers.remove_rules(get_init_rules())
+    helpers.remove_rules(CLOSED_NETWORK_FORWARDING)
+    helpers.remove_rules(OPEN_NETWORK_FORWARDING)
+    helpers.set_chain_policy("INPUT", "ACCEPT")
+    helpers.set_chain_policy("FORWARD", "ACCEPT")
+    helpers.remove_set(SAME_TEAM_SET)
+    helpers.remove_chain(OPEN_NET_CHAIN)
+    helpers.remove_chain(CLOSED_NET_CHAIN)
 
 
 def open_network(args):
@@ -170,6 +183,9 @@ def main():
 
     init_parser = subparsers.add_parser("init", help="Initialize the network")
     init_parser.set_defaults(func=init_network)
+
+    reset_parser = subparsers.add_parser("reset", help="Reset the network")
+    reset_parser.set_defaults(func=reset_network)
 
     open_parser = subparsers.add_parser("open", help="Open the network")
     open_parser.set_defaults(func=open_network)
