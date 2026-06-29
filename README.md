@@ -4,6 +4,8 @@ Script for easy deployment of Attack-Defense CTFs.
 
 > [!WARNING]
 > I don't remember what's current state of this repository is. Some stuff could be suboptimal, there might be flaws and drawbacks and straight up bugs. I don't care anymore. I still believe that my work can be important as a reference for those who care about CTFs, so I am publishing it despite it's messy state. Use with caution (or better yet, just look, learn, question everything and implement your infra yourself)
+>
+> Also see `dev` branch, I think I've left some useful stuff there, although in even messier state than `master`
 
 ## Usage
 
